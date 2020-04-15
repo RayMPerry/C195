@@ -13,15 +13,13 @@ public class ScreenManager {
 
 	private static void initialize() {
 		screens.put(ScreenCode.CHOOSE_LOCALE, "%n1) %s%n2) %s%nPlease choose your language:%nPor favor elige tu idioma:%n");
-		screens.put(ScreenCode.LOG_IN_USER, "%s: ");
-		screens.put(ScreenCode.LOG_IN_PASS, "%s: ");
+		screens.put(ScreenCode.LOG_IN, "%s: ");
 		
 		isReady = true;
 	}
 
-	public static String changeScreen(ScreenCode screenCode) {
+	public static void changeCurrentScreen(ScreenCode screenCode) {
 		currentScreen = screenCode;
-		return getScreen(currentScreen);
 	}
 	
 	public static String getScreen(ScreenCode screenCode) {

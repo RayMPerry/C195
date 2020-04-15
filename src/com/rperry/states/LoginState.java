@@ -10,10 +10,6 @@ public class LoginState implements BasicState {
 	private static final int MAXIMUM_LOGIN_ATTEMPTS = 3;
 	private static final String MAGIC_LOGIN = "test";
 
-	public static void setup(LocaleManager _localeManager) {
-		localeManager = _localeManager;
-	}
-	
 	public static void run(String username, String password) {
 		boolean isLoginValid = false;
 		int numberOfLoginAttempts = 0;
@@ -21,12 +17,12 @@ public class LoginState implements BasicState {
 			if (numberOfLoginAttempts >= MAXIMUM_LOGIN_ATTEMPTS) System.exit(1);
 
 			if (username == "") {
-				System.out.format(ScreenManager.getScreen(ScreenCode.LOG_IN_USER), localeManager.getMessage(MessageCode.USERNAME));
+				System.out.format(ScreenManager.getScreen(ScreenCode.LOG_IN), localeManager.getMessage(MessageCode.USERNAME));
 				username = InputManager.waitForAnyInput().trim();
 			}
 
 			if (password == "") {
-				System.out.format(ScreenManager.getScreen(ScreenCode.LOG_IN_PASS), localeManager.getMessage(MessageCode.PASSWORD));
+				System.out.format(ScreenManager.getScreen(ScreenCode.LOG_IN), localeManager.getMessage(MessageCode.PASSWORD));
 				password = InputManager.waitForPasswordInput().trim();
 			}
 
@@ -50,9 +46,13 @@ public class LoginState implements BasicState {
 
 			isLoginValid = true;
 		}
+		
+		teardown();
 	}
 	
-	public static void draw() {
-		
+	public static void setup() {}
+	public static void draw() {}
+	public static void teardown() {
+		ScreenManager.changeCurrentScreen(ScreenCode.MAIN_VIEW);
 	}
 }

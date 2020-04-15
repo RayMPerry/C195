@@ -6,17 +6,12 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class LocaleManager {
-	private Map<MessageCode, String> englishMessages = new HashMap<>();
-	private Map<MessageCode, String> spanishMessages = new HashMap<>();
-
-	private Locale currentLocale = Locale.EN_US;
-	private Map<MessageCode, String> currentMessages;
+	private static Map<MessageCode, String> englishMessages = new HashMap<>();
+	private static Map<MessageCode, String> spanishMessages = new HashMap<>();
+	private static Locale currentLocale = Locale.EN_US;
+	private static Map<MessageCode, String> currentMessages;
 	
-	public LocaleManager(Locale locale) {
-		this.reinitializeMessages(locale);
-	}
-
-	private void reinitializeMessages(Locale locale) {
+	public static void loadLocale(Locale locale) {
 		// English messages
 		englishMessages.put(MessageCode.USER_PASS_INVALID, "The username and password did not match.%n");
 		englishMessages.put(MessageCode.USERNAME, "Username");
@@ -27,17 +22,17 @@ public class LocaleManager {
 		spanishMessages.put(MessageCode.USERNAME, "Nombre de usuario");
 		spanishMessages.put(MessageCode.PASSWORD, "Contraseña");
 
-		this.currentMessages = locale == Locale.ES_ME ? this.spanishMessages : this.englishMessages;
+		currentMessages = locale == Locale.ES_ME ? spanishMessages : englishMessages;
 
 		System.out.format("Loaded %s locale.%n", locale.dialect);
-		this.currentLocale = locale;
+		currentLocale = locale;
 	}
 	
-	public String getMessage(MessageCode shortCode) {
+	public static String getMessage(MessageCode shortCode) {
 		String message;
 		
 		try {
-			message = this.currentMessages.get(shortCode);
+			message = currentMessages.get(shortCode);
 		} catch (Exception err) {
 			message = "Code " + shortCode + " does not exist.%n";
 		}

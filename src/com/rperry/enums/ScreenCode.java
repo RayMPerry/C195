@@ -2,6 +2,6 @@ package com.rperry.enums;
 
 public enum ScreenCode {
 	CHOOSE_LOCALE,
-	LOG_IN_USER,
-	LOG_IN_PASS;
+	LOG_IN,
+	MAIN_VIEW
 }
