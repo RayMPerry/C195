@@ -10,9 +10,6 @@ import java.sql.Connection;
 import java.util.stream.*;
 
 public class SchedulingApplication {
-	private static final int MAXIMUM_LOGIN_ATTEMPTS = 3;
-	private static final String MAGIC_LOGIN = "test";
-	
     public static void main(String[] args) {
 		String locale = "";
 		String username = "";
@@ -47,8 +44,8 @@ public class SchedulingApplication {
 
 		l8n = new LocaleManager(locale == "ES_ME" ? Locale.ES_ME : Locale.EN_US);
 
-		LoginState loginState = new LoginState(l8n);
-		loginState.draw();
-		loginState.run(username, password);
+		LoginState.setup(l8n);
+		LoginState.draw();
+		LoginState.run(username, password);
     }
 }
