@@ -1,4 +1,4 @@
-package com.rperry.enums;
+package com.schedulingcli.enums;
 
 public enum Locale {
 	EN_US("American English"),

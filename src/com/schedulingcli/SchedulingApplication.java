@@ -1,13 +1,10 @@
-package com.rperry;
+package com.schedulingcli;
 
-import com.rperry.utils.*;
-import com.rperry.enums.*;
-import com.rperry.states.*;
+import com.schedulingcli.utils.*;
+import com.schedulingcli.enums.*;
+import com.schedulingcli.states.*;
 
-import java.io.*;
-import java.util.Scanner;
 import java.sql.Connection;
-import java.util.stream.*;
 
 public class SchedulingApplication {
 	public static boolean isRunning = true;

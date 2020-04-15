@@ -1,8 +1,7 @@
-package com.rperry.states;
+package com.schedulingcli.states;
 
-import com.rperry.utils.*;
-import com.rperry.enums.*;
-import com.rperry.states.*;
+import com.schedulingcli.utils.*;
+import com.schedulingcli.enums.*;
 
 public class LoginState implements BasicState {
 	private static LocaleManager localeManager;

@@ -1,4 +1,4 @@
-package com.rperry.utils;
+package com.schedulingcli.utils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

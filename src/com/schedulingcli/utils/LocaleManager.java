@@ -1,6 +1,6 @@
-package com.rperry.utils;
+package com.schedulingcli.utils;
 
-import com.rperry.enums.*;
+import com.schedulingcli.enums.*;
 
 import java.util.Map;
 import java.util.HashMap;

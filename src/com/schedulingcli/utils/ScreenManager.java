@@ -1,9 +1,9 @@
-package com.rperry.utils;
+package com.schedulingcli.utils;
 
 import java.util.Map;
 import java.util.HashMap;
 
-import com.rperry.enums.ScreenCode;
+import com.schedulingcli.enums.ScreenCode;
 
 public class ScreenManager {
 	private static Map<ScreenCode, String> screens = new HashMap<>();

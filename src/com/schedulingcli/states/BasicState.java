@@ -1,4 +1,4 @@
-package com.rperry.states;
+package com.schedulingcli.states;
 
 public interface BasicState {
 	public static void setup() {}
