@@ -10,7 +10,8 @@ public class StateManager {
 	private static ScreenCode currentScreen;
 
 	public static final int MAXIMUM_LOGIN_ATTEMPTS = 3;
-	public static final String MAGIC_LOGIN = "test";	
+	public static final String MAGIC_LOGIN = "test";
+	public static final String LOG_FILE_PATH = "logs/logins.txt";
 
 	public static String getValue(String key) {
 		return globals.get(key);

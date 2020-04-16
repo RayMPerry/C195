@@ -2,5 +2,6 @@ package com.schedulingcli.enums;
 
 public enum CreationMode {
 	Create,
-	Update;
+	Update,
+	Ensure
 }

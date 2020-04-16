@@ -4,7 +4,9 @@ import com.schedulingcli.utils.*;
 import com.schedulingcli.enums.*;
 import com.schedulingcli.states.*;
 
-import java.sql.Connection;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.sql.SQLException;
 
 public class SchedulingApplication {
 	public static boolean isRunning = true;
@@ -13,6 +15,9 @@ public class SchedulingApplication {
 		String locale = "";
 		String username = "";
 		String password = "";
+
+		StateManager.setValue("loggedInUser", "system");
+		StateManager.setValue("logFilePath", "logs/logins.txt");
 
 		for (int index = 0; index < args.length; index++) {
 			String currentArgument = args[index];
@@ -40,6 +45,9 @@ public class SchedulingApplication {
 		
 		DbManager.connect();
 		if (DbManager.getConnection() == null) System.exit(1);
+		if (!Files.exists(Paths.get(StateManager.LOG_FILE_PATH))) {
+			DbManager.createUser(StateManager.MAGIC_LOGIN, StateManager.MAGIC_LOGIN, "1");
+		}
 
 		if (locale.equals("")) {
 			StateManager.setCurrentScreen(ScreenCode.CHOOSE_LOCALE);

@@ -1,6 +1,6 @@
 package com.schedulingcli.enums;
 
-public enum SchemaName {
+public enum Schema {
 	Address("address", "addressId"),
 	Appointment("appointment", "appointmentId"),
 	City("city", "cityId"),
@@ -11,7 +11,7 @@ public enum SchemaName {
 	public final String tableName;
 	public final String primaryKeyName;
 
-	SchemaName(String tableName, String primaryKeyName) {
+	Schema(String tableName, String primaryKeyName) {
 		this.tableName = tableName;
 		this.primaryKeyName = primaryKeyName;
 	}
