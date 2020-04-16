@@ -1,16 +1,18 @@
 package com.schedulingcli.enums;
 
 public enum SchemaName {
-	Address("address"),
-	Appointment("appointment"),
-	City("city"),
-	Country("country"),
-	Customer("customer"),
-	User("user");
+	Address("address", "addressId"),
+	Appointment("appointment", "appointmentId"),
+	City("city", "cityId"),
+	Country("country", "countryId"),
+	Customer("customer", "customerId"),
+	User("user", "userId");
 
 	public final String tableName;
+	public final String primaryKeyName;
 
-	SchemaName(String tableName) {
+	SchemaName(String tableName, String primaryKeyName) {
 		this.tableName = tableName;
+		this.primaryKeyName = primaryKeyName;
 	}
 }

@@ -8,7 +8,9 @@ public class MainViewState implements BasicState {
 	}
 
 	public static void run() {
-		DbManager.createCustomerRecord("testUser", "2", "1");
+		String customerId = String.valueOf(DbManager.createCustomer("The First Test", "2", "1"));
+		DbManager.updateCustomer(customerId, "The Last Test", "2", "0");
+		DbManager.deleteCustomer(customerId);
 		teardown();
 	}
 	

@@ -60,13 +60,42 @@ public class DbManager {
 		}
 		
 		if (creationMode == CreationMode.Update) {
-			statementConclusion = String.format("WHERE %s = ?", "customerId");
+			statementConclusion = String.format("WHERE %s = ?", schemaName.primaryKeyName);
 		}
 		
 		return String.format("%s %s %s", statementPreamble, slotsString, statementConclusion);
 	}
+
+	public static ResultSet retrieveRow(String tableName, String primaryKeyName, String primaryKeyValue) {
+		ResultSet results = null;
+
+		try {
+			String sqlQuery = "SELECT * FROM %s WHERE %s = %s";
+			Statement retrievalStatement = dbConnection.createStatement();
+			results = retrievalStatement.executeQuery(String.format(sqlQuery, tableName, primaryKeyName, primaryKeyValue));
+		} catch (SQLException err) {
+			err.printStackTrace();
+		}
+
+		return results;
+	}
+
+	public static int deleteOne(String tableName, String primaryKeyName, String primaryKeyValue) {
+		int primaryKeyOfAffectedRecord = -1;
+
+		try {
+			String sqlQuery = "DELETE FROM %s WHERE %s = %s";
+			Statement retrievalStatement = dbConnection.createStatement();
+			retrievalStatement.execute(String.format(sqlQuery, tableName, primaryKeyName, primaryKeyValue));
+			primaryKeyOfAffectedRecord = Integer.parseInt(primaryKeyValue);
+		} catch (SQLException err) {
+			err.printStackTrace();
+		}
+
+		return primaryKeyOfAffectedRecord;
+	}
 	
-	private static void createOrUpdate(CreationMode creationMode, SchemaName schemaName, String... values) {
+	private static int createOrUpdate(CreationMode creationMode, SchemaName schemaName, String... values) {
 		/*
 		  customerId | int(10) AI PK
 		  customerName | varchar(45)
@@ -79,11 +108,12 @@ public class DbManager {
 		*/
 
 		String[] columnNames;
+		int primaryKeyOfNewRecord = -1;
 		
 		switch (schemaName) {
 			case Customer:
 				columnNames = new String[] {
-					"customerId",
+					schemaName.primaryKeyName,
 					"customerName",
 					"addressId",
 					"active",
@@ -105,59 +135,74 @@ public class DbManager {
 				String createdBy = lastUpdateBy;
 
 				if (creationMode == CreationMode.Create) {
-					values = Stream.of(new String[] { "0" }, values)
-							 .flatMap(Stream::of)
-							 .toArray(String[]::new);
+					values = Stream
+							.of(new String[] { String.valueOf(customerId) }, values)
+							.flatMap(Stream::of)
+							.toArray(String[]::new);
 				}
-				
-				if (creationMode == CreationMode.Update) {
-					String sqlQuery = "SELECT * FROM %s WHERE %s = %s";
-					try {
-						Statement retrievalStatement = dbConnection.createStatement();
-						ResultSet results = retrievalStatement.executeQuery(String.format(sqlQuery, schemaName.tableName, "customerId", values[0]));
 
+				if (creationMode == CreationMode.Update) {
+					try {
+						ResultSet results = retrieveRow(schemaName.tableName, schemaName.primaryKeyName, values[0]);
+						
 						while (results.next()) {
+							customerId = results.getInt(schemaName.primaryKeyName);
 							customerName = results.getString("customerName");
 							addressId = results.getInt("addressId");
 							active = results.getInt("active");
 							createDate = results.getTimestamp("createDate");
 							createdBy = results.getString("createdBy");
 						}
-
+						
 						results.close();
 					} catch (SQLException err) {
 						err.printStackTrace();
 					}
 				}
-				
-				try (PreparedStatement updateStatement = dbConnection.prepareStatement(fullStatement)) {
+
+				try (PreparedStatement updateStatement = dbConnection.prepareStatement(fullStatement, Statement.RETURN_GENERATED_KEYS)) {
 					for (int index = 0; index < values.length; index++) {
-						if (index == 0) updateStatement.setInt(1, Integer.parseInt(values[0]));
-						if (index == 1) updateStatement.setString(2, values[1]);
-						if (index == 2) updateStatement.setInt(3, Integer.parseInt(values[2]));
-						if (index == 3) updateStatement.setInt(4, Integer.parseInt(values[3]));
+						if (index == 0) customerId = Integer.parseInt(values[0]);
+						if (index == 1) customerName = values[1];
+						if (index == 2) addressId = Integer.parseInt(values[2]);
+						if (index == 3) active = Integer.parseInt(values[3]);
 					}
 					
-					if (creationMode == CreationMode.Create) {
-						createDate = lastUpdate;
-						createdBy = lastUpdateBy;
-					}
-
+					updateStatement.setInt(1, customerId);
+					updateStatement.setString(2, customerName);
+					updateStatement.setInt(3, addressId);
+					updateStatement.setInt(4, active);
 					updateStatement.setTimestamp(5, createDate);
 					updateStatement.setString(6, createdBy);					
 					updateStatement.setTimestamp(7, lastUpdate);
 					updateStatement.setString(8, lastUpdateBy);
 
-					updateStatement.execute();
+					if (creationMode == CreationMode.Update) {
+						updateStatement.setInt(9, customerId);
+					}
+
+					updateStatement.executeUpdate();
+					ResultSet results = updateStatement.getGeneratedKeys();
+					if (results.next()) primaryKeyOfNewRecord = results.getInt(1);
 				} catch (SQLException err) {
 					err.printStackTrace();
 					System.err.println("Could not update all values as provided. Refusing to proceed.");
 				}
 				break;
 		}
+
+		return primaryKeyOfNewRecord;
 	}
 	
-	public static void createCustomerRecord(String... values) {
-		createOrUpdate(CreationMode.Create, SchemaName.Customer, values);
+	public static int createCustomer(String... values) {
+		return createOrUpdate(CreationMode.Create, SchemaName.Customer, values);
 	};
+
+	public static int updateCustomer(String... values) {
+		return createOrUpdate(CreationMode.Update, SchemaName.Customer, values);
+	};
+
+	public static int deleteCustomer(String customerId) {
+		return deleteOne(SchemaName.Customer.tableName, SchemaName.Customer.primaryKeyName, customerId);
+	}
 }

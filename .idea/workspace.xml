@@ -3,12 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="b125ebe0-87b0-4d33-b110-596cc4aa13ec" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/C195-CLI.iml" beforeDir="false" afterPath="$PROJECT_DIR$/C195-CLI.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/SchedulingApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/SchedulingApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/enums/ScreenCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/enums/ScreenCode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/states/LoginState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/states/LoginState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/enums/SchemaName.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/enums/SchemaName.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/states/MainViewState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/states/MainViewState.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/utils/DbManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/utils/DbManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/utils/ScreenManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/utils/ScreenManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,68 +69,68 @@
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state x="678" y="242" key="#com.intellij.openapi.roots.ui.configuration.libraryEditor.LibraryEditorDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1587002191159" />
-    <state x="603" y="235" key="#xdebugger.evaluate" timestamp="1587002492918">
+    <state x="603" y="235" key="#xdebugger.evaluate" timestamp="1587052302332">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state x="603" y="235" key="#xdebugger.evaluate/0.0.1680.1050@0.0.1680.1050" timestamp="1587002492918" />
-    <state width="1638" height="287" key="GridCell.Tab.0.bottom" timestamp="1587003875471">
+    <state x="603" y="235" key="#xdebugger.evaluate/0.0.1680.1050@0.0.1680.1050" timestamp="1587052302332" />
+    <state width="1638" height="354" key="GridCell.Tab.0.bottom" timestamp="1587061281367">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="287" key="GridCell.Tab.0.bottom/0.0.1680.1050@0.0.1680.1050" timestamp="1587003875471" />
-    <state width="1638" height="287" key="GridCell.Tab.0.center" timestamp="1587003875470">
+    <state width="1638" height="354" key="GridCell.Tab.0.bottom/0.0.1680.1050@0.0.1680.1050" timestamp="1587061281367" />
+    <state width="1638" height="354" key="GridCell.Tab.0.center" timestamp="1587061281366">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="287" key="GridCell.Tab.0.center/0.0.1680.1050@0.0.1680.1050" timestamp="1587003875470" />
-    <state width="1638" height="287" key="GridCell.Tab.0.left" timestamp="1587003875470">
+    <state width="1638" height="354" key="GridCell.Tab.0.center/0.0.1680.1050@0.0.1680.1050" timestamp="1587061281366" />
+    <state width="1638" height="354" key="GridCell.Tab.0.left" timestamp="1587061281365">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="287" key="GridCell.Tab.0.left/0.0.1680.1050@0.0.1680.1050" timestamp="1587003875470" />
-    <state width="1638" height="287" key="GridCell.Tab.0.right" timestamp="1587003875471">
+    <state width="1638" height="354" key="GridCell.Tab.0.left/0.0.1680.1050@0.0.1680.1050" timestamp="1587061281365" />
+    <state width="1638" height="354" key="GridCell.Tab.0.right" timestamp="1587061281366">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="287" key="GridCell.Tab.0.right/0.0.1680.1050@0.0.1680.1050" timestamp="1587003875471" />
-    <state width="1638" height="354" key="GridCell.Tab.1.bottom" timestamp="1587003810639">
+    <state width="1638" height="354" key="GridCell.Tab.0.right/0.0.1680.1050@0.0.1680.1050" timestamp="1587061281366" />
+    <state width="1638" height="354" key="GridCell.Tab.1.bottom" timestamp="1587061282159">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="354" key="GridCell.Tab.1.bottom/0.0.1680.1050@0.0.1680.1050" timestamp="1587003810639" />
-    <state width="1638" height="354" key="GridCell.Tab.1.center" timestamp="1587003810638">
+    <state width="1638" height="354" key="GridCell.Tab.1.bottom/0.0.1680.1050@0.0.1680.1050" timestamp="1587061282159" />
+    <state width="1638" height="354" key="GridCell.Tab.1.center" timestamp="1587061282157">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="354" key="GridCell.Tab.1.center/0.0.1680.1050@0.0.1680.1050" timestamp="1587003810638" />
-    <state width="1638" height="354" key="GridCell.Tab.1.left" timestamp="1587003810637">
+    <state width="1638" height="354" key="GridCell.Tab.1.center/0.0.1680.1050@0.0.1680.1050" timestamp="1587061282157" />
+    <state width="1638" height="354" key="GridCell.Tab.1.left" timestamp="1587061282157">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="354" key="GridCell.Tab.1.left/0.0.1680.1050@0.0.1680.1050" timestamp="1587003810637" />
-    <state width="1638" height="354" key="GridCell.Tab.1.right" timestamp="1587003810638">
+    <state width="1638" height="354" key="GridCell.Tab.1.left/0.0.1680.1050@0.0.1680.1050" timestamp="1587061282157" />
+    <state width="1638" height="354" key="GridCell.Tab.1.right" timestamp="1587061282158">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="354" key="GridCell.Tab.1.right/0.0.1680.1050@0.0.1680.1050" timestamp="1587003810638" />
+    <state width="1638" height="354" key="GridCell.Tab.1.right/0.0.1680.1050@0.0.1680.1050" timestamp="1587061282158" />
     <state x="328" y="106" key="SettingsEditor" timestamp="1587003037079">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state x="328" y="106" key="SettingsEditor/0.0.1680.1050@0.0.1680.1050" timestamp="1587003037079" />
-    <state x="517" y="357" key="com.intellij.ide.util.TipDialog" timestamp="1587002097656">
+    <state x="517" y="357" key="com.intellij.ide.util.TipDialog" timestamp="1587052279319">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state x="517" y="357" key="com.intellij.ide.util.TipDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1587002097656" />
+    <state x="517" y="357" key="com.intellij.ide.util.TipDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1587052279319" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/com/schedulingcli/utils/DbManager.java</url>
-          <line>82</line>
-          <option name="timeStamp" value="6" />
+          <url>file://$PROJECT_DIR$/src/com/schedulingcli/states/MainViewState.java</url>
+          <line>12</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/com/schedulingcli/states/MainViewState.java</url>
+          <line>11</line>
+          <option name="timeStamp" value="15" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/com/schedulingcli/states/MainViewState.java</url>
           <line>10</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/com/schedulingcli/utils/DbManager.java</url>
-          <line>150</line>
-          <option name="timeStamp" value="10" />
+          <option name="timeStamp" value="16" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
