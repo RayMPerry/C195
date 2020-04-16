@@ -8,12 +8,12 @@ public class MainViewState implements BasicState {
 	}
 
 	public static void run() {
-		String countryId = String.valueOf(DbManager.createCountry("USA"));
-		String cityId = String.valueOf(DbManager.createCity("Chicago", countryId));
-		String addressId = String.valueOf(DbManager.createAddress("3238 N Drake Ave", "1", cityId, "60618", "6304027433"));
-		String customerId = String.valueOf(DbManager.createCustomer("My Test", addressId, "1"));
+		String countryId = String.valueOf(DBManager.createCountry("USA"));
+		String cityId = String.valueOf(DBManager.createCity("Chicago", countryId));
+		String addressId = String.valueOf(DBManager.createAddress("3238 N Drake Ave", "1", cityId, "60618", "6304027433"));
+		String customerId = String.valueOf(DBManager.createCustomer("My Test", addressId, "1"));
 
-		DbManager.createAppointment(
+		DBManager.createAppointment(
 				customerId,
 				StateManager.getValue("loggedInUserId"),
 				"First Appointment",

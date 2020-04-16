@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import com.schedulingcli.enums.*;
 
-public class DbManager {
+public class DBManager {
 	private static Connection dbConnection = null;
 
 	public static void closeConnection() {

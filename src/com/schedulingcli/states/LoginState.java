@@ -3,7 +3,6 @@ package com.schedulingcli.states;
 import com.schedulingcli.utils.*;
 import com.schedulingcli.enums.*;
 
-import javax.swing.plaf.nimbus.State;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -32,7 +31,7 @@ public class LoginState implements BasicState {
 			numberOfLoginAttempts++;
 			
 			try {
-				if (!DbManager.areCredentialsValid(userName, password)) {
+				if (!DBManager.areCredentialsValid(userName, password)) {
 					System.out.format(LocaleManager.getMessage(MessageCode.USER_PASS_INVALID));
 					throw new Exception("Invalid credentials");
 				}
