@@ -9,8 +9,6 @@ public class ScreenManager {
 	private static Map<ScreenCode, String> screens = new HashMap<>();
 	private static boolean isReady = false;
 
-	public static ScreenCode currentScreen;
-
 	private static void initialize() {
 		screens.put(ScreenCode.CHOOSE_LOCALE, "%n1) %s%n2) %s%nPlease choose your language:%nPor favor elige tu idioma:%n");
 		screens.put(ScreenCode.LOG_IN, "%s: ");
@@ -18,8 +16,8 @@ public class ScreenManager {
 		isReady = true;
 	}
 
-	public static void changeCurrentScreen(ScreenCode screenCode) {
-		currentScreen = screenCode;
+	public static String getCurrentScreen() {
+		return getScreen(StateManager.getCurrentScreen());
 	}
 	
 	public static String getScreen(ScreenCode screenCode) {

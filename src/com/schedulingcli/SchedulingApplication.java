@@ -38,28 +38,30 @@ public class SchedulingApplication {
 			}
 		}
 		
-		Connection db = DbManager.connect();
-		if (db == null) System.exit(1);
+		DbManager.connect();
+		if (DbManager.getConnection() == null) System.exit(1);
 
-		LocaleManager l8n;
 		if (locale.equals("")) {
-			System.out.format(ScreenManager.getScreen(ScreenCode.CHOOSE_LOCALE), Locale.EN_US.dialect, Locale.ES_ME.dialect);
-			InputManager.setValidResponses("1", "2");
-			String response = InputManager.waitForValidInput();
-			locale = response.equals("2") ? "ES_ME" : "EN_US";
+			StateManager.setCurrentScreen(ScreenCode.CHOOSE_LOCALE);
+		} else {
+			StateManager.setCurrentScreen(ScreenCode.LOG_IN);
 		}
 
-		LocaleManager.loadLocale(locale.equals("ES_ME") ? Locale.ES_ME : Locale.EN_US);
-		ScreenManager.changeCurrentScreen(ScreenCode.LOG_IN);
-		
 		while (isRunning) {
-			switch (ScreenManager.currentScreen) {
+			switch (StateManager.getCurrentScreen()) {
+				case CHOOSE_LOCALE:
+					ChooseLocaleState.setup();
+					ChooseLocaleState.run();
+					break;
 				case LOG_IN:
 					LoginState.setup();
-					LoginState.draw();
 					LoginState.run(username, password);
 					break;
-				default:
+				case MAIN_VIEW:
+					MainViewState.setup();
+					MainViewState.run();
+					break;
+				case EXIT:
 					isRunning = false;
 					break;
 			}
