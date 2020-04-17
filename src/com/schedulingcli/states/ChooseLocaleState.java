@@ -4,7 +4,9 @@ import com.schedulingcli.enums.*;
 import com.schedulingcli.utils.*;
 
 public class ChooseLocaleState implements BasicState {
-	public static void setup() { }
+	public static void setup() {
+		draw();
+	}
 
 	public static void run() {
 		InputManager.setValidResponses("1", "2");

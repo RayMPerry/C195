@@ -61,7 +61,7 @@ public class LoginState implements BasicState {
 				Files.createFile(logFilePath);
 			}
 
-			String logLine = String.format("[%s] %s logged in.", System.currentTimeMillis(), username);
+			String logLine = String.format("[%s] %s logged in.", new java.sql.Timestamp(System.currentTimeMillis()), username);
 			System.out.println(logLine);
 			Files.write(logFilePath, Arrays.asList(logLine), StandardCharsets.UTF_8, StandardOpenOption.APPEND);
 		} catch (IOException err) {

@@ -69,6 +69,7 @@ public class SchedulingApplication {
 					MainViewState.run();
 					break;
 				case EXIT:
+					DBManager.closeConnection();
 					isRunning = false;
 					break;
 			}

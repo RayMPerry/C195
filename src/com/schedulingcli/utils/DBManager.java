@@ -2,7 +2,10 @@ package com.schedulingcli.utils;
 
 import java.sql.*;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 
@@ -11,20 +14,12 @@ import com.schedulingcli.enums.*;
 public class DBManager {
 	private static Connection dbConnection = null;
 
-	public static void closeConnection() {
-		try {
-			dbConnection.close();
-		} catch (SQLException err) {
-			err.printStackTrace();
-		}
-	}
-	
-    public static void connect() {
+	public static void connect() {
 		try {
 			String url = "jdbc:mysql://3.227.166.251:3306/U05NJc";
 			String user = "U05NJc";
 			String password = "53688551183";
-	
+
 			dbConnection = DriverManager.getConnection(url, user, password);
 		} catch (SQLException err) {
 			System.out.println(err.getMessage());
@@ -32,10 +27,18 @@ public class DBManager {
 			String statusMessage = dbConnection != null ? "Connected to" : "Failed to connect to";
 			System.out.format("%s the database.%n", statusMessage);
 		}
-    }
+	}
 
 	public static Connection getConnection() {
 		return dbConnection;
+	}
+
+	public static void closeConnection() {
+		try {
+			dbConnection.close();
+		} catch (SQLException err) {
+			err.printStackTrace();
+		}
 	}
 
 	private static String getSlotsString(CreationMode creationMode, String[] columnNames) {
@@ -79,6 +82,21 @@ public class DBManager {
 		return String.format("%s %s %s", statementPreamble, slotsString, statementConclusion);
 	}
 
+	public static boolean areCredentialsValid(String userName, String password) {
+		boolean isValidLogin = false;
+		ResultSet user = retrieve("WHERE %s = '%s'", "user", "userName", userName);
+		try {
+			isValidLogin = user.next() && user.getString("password").equals(password);
+			if (isValidLogin) {
+				StateManager.setValue("loggedInUserId", String.valueOf(user.getInt("userId")));
+				StateManager.setValue("loggedInUser", user.getString("userName"));
+			}
+		} catch (SQLException err) {
+			err.printStackTrace();
+		}
+		return isValidLogin;
+	}
+
 	private static ResultSet retrieve(String whereCondition, String tableName, String keyName, String keyValue) {
 		ResultSet results = null;
 		String sqlQuery;
@@ -99,27 +117,49 @@ public class DBManager {
 		return results;
 	}
 
-	public static boolean areCredentialsValid(String userName, String password) {
-		boolean isValidLogin = false;
-		ResultSet user = retrieve("WHERE %s = '%s'", "user", "userName", userName);
-		try {
-			isValidLogin = user.next() && user.getString("password").equals(password);
-			if (isValidLogin) {
-				StateManager.setValue("loggedInUserId", String.valueOf(user.getInt("userId")));
-				StateManager.setValue("loggedInUser", user.getString("userName"));
-			}
-		} catch (SQLException err) {
-			err.printStackTrace();
-		}
-		return isValidLogin;
-	}
-
 	public static ResultSet retrieveOne(String tableName, String primaryKeyName, String primaryKeyValue) {
 		return retrieve("WHERE %s = %s", tableName, primaryKeyName, primaryKeyValue);
 	}
 
 	public static ResultSet retrieveAll(String tableName, String primaryKeyName, String primaryKeyValue) {
 		return retrieve("", tableName, primaryKeyName, primaryKeyValue);
+	}
+
+	public static ResultSet getUpcomingAppointments(ReportingMode reportingMode, String userId) {
+		ResultSet results = null;
+
+		long interval = 0;
+		switch (reportingMode) {
+			case IMMINENT:
+				interval = TimeUnit.MINUTES.toMillis(15);
+				break;
+			case WEEK:
+				interval = TimeUnit.DAYS.toMillis(7);
+				break;
+			case MONTH:
+				interval = TimeUnit.DAYS.toMillis(30);
+				break;
+		}
+
+		try {
+			String formattedString = "SELECT * FROM appointment WHERE userId = %s AND start BETWEEN '%s' and '%s'";
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+			long now = System.currentTimeMillis();
+			long nowPlusInterval = now + interval;
+			String sqlQuery = String.format(formattedString, userId, dateFormat.format(new Timestamp(now)), dateFormat.format(new Timestamp(nowPlusInterval)));
+
+			Statement retrievalStatement = dbConnection.createStatement();
+			results = retrievalStatement.executeQuery(sqlQuery);
+		} catch (SQLException err) {
+			err.printStackTrace();
+		}
+
+		return results;
+	}
+
+	public static ResultSet getImminentAppointments(String userId) {
+		return getUpcomingAppointments(ReportingMode.IMMINENT, userId);
 	}
 
 	public static int deleteOne(String tableName, String primaryKeyName, String primaryKeyValue) {
