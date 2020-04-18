@@ -12,8 +12,6 @@ public class SchedulingApplication {
 	
     public static void main(String[] args) {
 		String locale = "";
-		String username = "";
-		String password = "";
 
 		StateManager.setValue("loggedInUser", "system");
 		StateManager.setValue("logFilePath", "logs/logins.txt");
@@ -34,10 +32,10 @@ public class SchedulingApplication {
 					if (isValidValue) locale = nextArgument;
 					break;
 				case "--username":
-					if (isValidValue) username = nextArgument;
+					if (isValidValue) StateManager.setValue("userName", nextArgument);
 					break;
 				case "--password":
-					if (isValidValue) password = nextArgument;
+					if (isValidValue) StateManager.setValue("password", nextArgument);
 					break;
 			}
 		}
@@ -48,36 +46,11 @@ public class SchedulingApplication {
 			DBManager.createDummyData();
 		}
 
-		if (locale.equals("")) {
-			StateManager.setCurrentScreen(ScreenCode.CHOOSE_LOCALE);
-		} else {
-			StateManager.setCurrentScreen(ScreenCode.LOG_IN);
-		}
+		StateManager.setCurrentScreen(locale.equals("") ? ScreenCode.CHOOSE_LOCALE : ScreenCode.LOG_IN);
+		StateManager.startApplication();
 
-		while (isRunning) {
-			switch (StateManager.getCurrentScreen()) {
-				case CHOOSE_LOCALE:
-					ChooseLocaleState.setup();
-					ChooseLocaleState.run();
-					break;
-				case LOG_IN:
-					LoginState.setup();
-					LoginState.run(username, password);
-					break;
-				case MAIN_VIEW:
-					MainViewState.setup();
-					MainViewState.run();
-					break;
-				case CREATE_RECORD:
-				case EDIT_RECORD:
-					UpdateRecordState.setup();
-					UpdateRecordState.run();
-					break;
-				case EXIT:
-					DBManager.closeConnection();
-					isRunning = false;
-					break;
-			}
+		while (StateManager.isApplicationRunning()) {
+			ScreenManager.showScreens();
 		}
     }
 }

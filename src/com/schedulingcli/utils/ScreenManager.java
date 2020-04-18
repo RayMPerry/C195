@@ -3,46 +3,80 @@ package com.schedulingcli.utils;
 import java.util.Map;
 import java.util.HashMap;
 
+import com.schedulingcli.enums.ReportingMode;
 import com.schedulingcli.enums.ScreenCode;
+import com.schedulingcli.states.*;
 
 public class ScreenManager {
-	private static Map<ScreenCode, String> screens = new HashMap<>();
-	private static boolean isReady = false;
+    private static Map<ScreenCode, String> screens = new HashMap<>();
+    private static boolean isReady = false;
 
-	private static void initialize() {
-		screens.put(ScreenCode.CHOOSE_LOCALE, "%n1) %s%n2) %s%nPlease choose your language:%nPor favor elige tu idioma:%n");
-		screens.put(ScreenCode.LOG_IN, "%s: ");
-		screens.put(ScreenCode.UPCOMING_APPTS, "You have %d upcoming appointments%s.%n%s%n");
-		screens.put(ScreenCode.CREATE_RECORD, "%s? ");
-		screens.put(ScreenCode.EDIT_RECORD, "New %s? ");
-		screens.put(ScreenCode.MAIN_VIEW,
-				"Choose an option:%n" +
-				"1) View appointments by week%n" +
-				"2) View appointments by month%n" +
-				"3) Create a new appointment%n" +
-				"4) Edit an existing appointment%n" +
-				"5) Create a new customer%n" +
-				"6) Edit an existing customer%n" +
-				"7) Exit%n");
+    private static void initialize() {
+        screens.put(ScreenCode.CHOOSE_LOCALE, "%n1) %s%n2) %s%nPlease choose your language:%nPor favor elige tu idioma:%n");
+        screens.put(ScreenCode.LOG_IN, "%s: ");
+        screens.put(ScreenCode.UPCOMING_APPOINTMENTS, "You have %d upcoming appointments%s.%n%s%n");
+        screens.put(ScreenCode.CREATE_RECORD, "%s (\"_q\" to cancel)? ");
+        screens.put(ScreenCode.EDIT_RECORD, "New %s (\"_q\" to cancel)? ");
+        screens.put(ScreenCode.DELETE_RECORD, "Specify the ID of the %s you wish to delete (\"_q\" to cancel): %n");
+        screens.put(ScreenCode.MAIN_VIEW,
+                "Choose an option:%n" +
+                        "1) View appointments by week%n" +
+                        "2) View appointments by month%n" +
+                        "3) Create a new appointment%n" +
+                        "4) Edit an existing appointment%n" +
+                        "5) Delete an existing appointment%n" +
+                        "6) Create a new customer%n" +
+                        "7) Edit an existing customer%n" +
+                        "8) Delete an existing customer%n" +
+                        "9) Exit%n");
 
-		isReady = true;
-	}
+        isReady = true;
+    }
 
-	public static String getCurrentScreen() {
-		return getScreen(StateManager.getCurrentScreen());
-	}
-	
-	public static String getScreen(ScreenCode screenCode) {
-		String screen;
+    public static String getCurrentScreen() {
+        return getScreen(StateManager.getCurrentScreen());
+    }
 
-		if (!isReady) initialize();
-		
-		try {
-			screen = screens.get(screenCode);
-		} catch (Exception err) {
-			screen = "Code " + screenCode + " does not exist.%n";
-		}
+    public static String getScreen(ScreenCode screenCode) {
+        String screen;
 
-		return screen;
-	}
+        if (!isReady) initialize();
+
+        try {
+            screen = screens.get(screenCode);
+        } catch (Exception err) {
+            screen = "Code " + screenCode + " does not exist.%n";
+        }
+
+        return screen;
+    }
+
+    public static void showScreens() {
+        switch (StateManager.getCurrentScreen()) {
+            case CHOOSE_LOCALE:
+                ChooseLocaleState.setup();
+                ChooseLocaleState.run();
+                break;
+            case LOG_IN:
+                LoginState.setup();
+                LoginState.run();
+                break;
+            case MAIN_VIEW:
+                MainViewState.setup(ReportingMode.IMMINENT);
+                break;
+            case CREATE_RECORD:
+            case EDIT_RECORD:
+                UpdateRecordState.setup();
+                UpdateRecordState.run();
+                break;
+            case DELETE_RECORD:
+                DeleteRecordState.setup();
+                DeleteRecordState.run();
+                break;
+            case EXIT:
+                DBManager.closeConnection();
+                StateManager.stopApplication();
+                break;
+        }
+    }
 }

@@ -9,7 +9,7 @@ public class ChooseLocaleState implements BasicState {
 	}
 
 	public static void run() {
-		InputManager.setValidResponses("1", "2");
+		InputManager.setValidResponsesWithArguments("1", "2");
 		String response = InputManager.waitForValidInput();
 		LocaleManager.loadLocale(response.equals("2") ? Locale.ES_ME : Locale.EN_US);
 		teardown();
