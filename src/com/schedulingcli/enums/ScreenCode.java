@@ -4,6 +4,7 @@ public enum ScreenCode {
 	CHOOSE_LOCALE,
 	LOG_IN,
 	MAIN_VIEW,
+	CREATE_RECORD,
     UPCOMING_APPTS,
-	EXIT
+	EDIT_RECORD, EXIT
 }

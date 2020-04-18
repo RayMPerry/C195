@@ -2,17 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b125ebe0-87b0-4d33-b110-596cc4aa13ec" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/com/schedulingcli/states/UpdateRecordState.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/SchedulingApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/SchedulingApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/enums/CreationMode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/enums/CreationMode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/enums/MessageCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/enums/MessageCode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/enums/SchemaName.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/enums/Schema.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/states/BasicState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/states/BasicState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/states/LoginState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/states/LoginState.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/enums/Schema.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/enums/Schema.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/enums/ScreenCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/enums/ScreenCode.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/states/MainViewState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/states/MainViewState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/utils/DbManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/utils/DbManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/utils/StateManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/utils/StateManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/utils/DBManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/utils/DBManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/utils/InputManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/utils/InputManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/utils/ScreenManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/utils/ScreenManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,6 +19,14 @@
   </component>
   <component name="CodeStyleSettingsInfer">
     <option name="done" value="true" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Enum" />
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -40,6 +46,11 @@
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="com.schedulingcli.states" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration name="SchedulingApplication" type="Application" factoryName="Application" temporary="true">
@@ -73,6 +84,10 @@
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state x="304" y="187" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1587003063870" />
+    <state x="653" y="248" key="#com.intellij.ide.util.MemberChooser" timestamp="1587079971827">
+      <screen x="0" y="0" width="1680" height="1050" />
+    </state>
+    <state x="653" y="248" key="#com.intellij.ide.util.MemberChooser/0.0.1680.1050@0.0.1680.1050" timestamp="1587079971827" />
     <state x="678" y="242" key="#com.intellij.openapi.roots.ui.configuration.libraryEditor.LibraryEditorDialog" timestamp="1587002191159">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
@@ -81,6 +96,10 @@
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state x="354" y="0" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1587068777014" />
+    <state x="578" y="279" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1587128229143">
+      <screen x="0" y="0" width="1680" height="1050" />
+    </state>
+    <state x="578" y="279" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1587128229143" />
     <state x="603" y="235" key="#xdebugger.evaluate" timestamp="1587052302332">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
@@ -89,38 +108,38 @@
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state x="597" y="403" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/0.0.1680.1050@0.0.1680.1050" timestamp="1587061567752" />
-    <state width="1638" height="287" key="GridCell.Tab.0.bottom" timestamp="1587072644553">
+    <state width="1638" height="354" key="GridCell.Tab.0.bottom" timestamp="1587125752738">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="287" key="GridCell.Tab.0.bottom/0.0.1680.1050@0.0.1680.1050" timestamp="1587072644553" />
-    <state width="1638" height="287" key="GridCell.Tab.0.center" timestamp="1587072644552">
+    <state width="1638" height="354" key="GridCell.Tab.0.bottom/0.0.1680.1050@0.0.1680.1050" timestamp="1587125752738" />
+    <state width="1638" height="354" key="GridCell.Tab.0.center" timestamp="1587125752737">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="287" key="GridCell.Tab.0.center/0.0.1680.1050@0.0.1680.1050" timestamp="1587072644552" />
-    <state width="1638" height="287" key="GridCell.Tab.0.left" timestamp="1587072644552">
+    <state width="1638" height="354" key="GridCell.Tab.0.center/0.0.1680.1050@0.0.1680.1050" timestamp="1587125752737" />
+    <state width="1638" height="354" key="GridCell.Tab.0.left" timestamp="1587125752736">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="287" key="GridCell.Tab.0.left/0.0.1680.1050@0.0.1680.1050" timestamp="1587072644552" />
-    <state width="1638" height="287" key="GridCell.Tab.0.right" timestamp="1587072644553">
+    <state width="1638" height="354" key="GridCell.Tab.0.left/0.0.1680.1050@0.0.1680.1050" timestamp="1587125752736" />
+    <state width="1638" height="354" key="GridCell.Tab.0.right" timestamp="1587125752737">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="287" key="GridCell.Tab.0.right/0.0.1680.1050@0.0.1680.1050" timestamp="1587072644553" />
-    <state width="1638" height="354" key="GridCell.Tab.1.bottom" timestamp="1587072587313">
+    <state width="1638" height="354" key="GridCell.Tab.0.right/0.0.1680.1050@0.0.1680.1050" timestamp="1587125752737" />
+    <state width="1638" height="354" key="GridCell.Tab.1.bottom" timestamp="1587125752739">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="354" key="GridCell.Tab.1.bottom/0.0.1680.1050@0.0.1680.1050" timestamp="1587072587313" />
-    <state width="1638" height="354" key="GridCell.Tab.1.center" timestamp="1587072587313">
+    <state width="1638" height="354" key="GridCell.Tab.1.bottom/0.0.1680.1050@0.0.1680.1050" timestamp="1587125752739" />
+    <state width="1638" height="354" key="GridCell.Tab.1.center" timestamp="1587125752738">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="354" key="GridCell.Tab.1.center/0.0.1680.1050@0.0.1680.1050" timestamp="1587072587313" />
-    <state width="1638" height="354" key="GridCell.Tab.1.left" timestamp="1587072587312">
+    <state width="1638" height="354" key="GridCell.Tab.1.center/0.0.1680.1050@0.0.1680.1050" timestamp="1587125752738" />
+    <state width="1638" height="354" key="GridCell.Tab.1.left" timestamp="1587125752738">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="354" key="GridCell.Tab.1.left/0.0.1680.1050@0.0.1680.1050" timestamp="1587072587312" />
-    <state width="1638" height="354" key="GridCell.Tab.1.right" timestamp="1587072587313">
+    <state width="1638" height="354" key="GridCell.Tab.1.left/0.0.1680.1050@0.0.1680.1050" timestamp="1587125752738" />
+    <state width="1638" height="354" key="GridCell.Tab.1.right" timestamp="1587125752738">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state width="1638" height="354" key="GridCell.Tab.1.right/0.0.1680.1050@0.0.1680.1050" timestamp="1587072587313" />
+    <state width="1638" height="354" key="GridCell.Tab.1.right/0.0.1680.1050@0.0.1680.1050" timestamp="1587125752738" />
     <state x="328" y="106" key="SettingsEditor" timestamp="1587003037079">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
@@ -129,23 +148,27 @@
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
     <state x="517" y="357" key="com.intellij.ide.util.TipDialog/0.0.1680.1050@0.0.1680.1050" timestamp="1587052279319" />
-    <state x="505" y="233" width="670" height="676" key="search.everywhere.popup" timestamp="1587062022609">
+    <state x="505" y="242" key="run.anything.popup" timestamp="1587081466746">
       <screen x="0" y="0" width="1680" height="1050" />
     </state>
-    <state x="505" y="233" width="670" height="676" key="search.everywhere.popup/0.0.1680.1050@0.0.1680.1050" timestamp="1587062022609" />
+    <state x="505" y="242" key="run.anything.popup/0.0.1680.1050@0.0.1680.1050" timestamp="1587081466746" />
+    <state x="505" y="233" width="670" height="676" key="search.everywhere.popup" timestamp="1587081131233">
+      <screen x="0" y="0" width="1680" height="1050" />
+    </state>
+    <state x="505" y="233" width="670" height="676" key="search.everywhere.popup/0.0.1680.1050@0.0.1680.1050" timestamp="1587081131233" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/com/schedulingcli/states/LoginState.java</url>
-          <line>35</line>
+          <line>34</line>
           <option name="timeStamp" value="24" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/com/schedulingcli/states/MainViewState.java</url>
-          <line>27</line>
-          <option name="timeStamp" value="27" />
+          <url>file://$PROJECT_DIR$/src/com/schedulingcli/utils/DBManager.java</url>
+          <line>151</line>
+          <option name="timeStamp" value="42" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

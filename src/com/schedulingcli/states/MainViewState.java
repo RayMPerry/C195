@@ -11,25 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 public class MainViewState implements BasicState {
     public static void setup() {
-/*		String countryId = String.valueOf(DBManager.createCountry("USA"));
-		String cityId = String.valueOf(DBManager.createCity("Chicago", countryId));
-		String addressId = String.valueOf(DBManager.createAddress("3238 N Drake Ave", "1", cityId, "60618", "6304027433"));
-		String customerId = String.valueOf(DBManager.createCustomer("My Test", addressId, "1"));
-*/
-		for (int index = 0; index < 5; index++) {
-			DBManager.createAppointment(
-					"8",
-					StateManager.getValue("loggedInUserId"),
-					"First Appointment",
-					"Yeah",
-					"Here",
-					"Me",
-					"Therapy",
-					"http://example.com",
-					String.valueOf(new Timestamp(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5))),
-					String.valueOf(new Timestamp(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(6))));
-		}
-
 		reportUpcomingAppointments(ReportingMode.IMMINENT);
     }
 
@@ -48,7 +29,8 @@ public class MainViewState implements BasicState {
 		try {
 			ResultSet upcomingAppointments = DBManager.getUpcomingAppointments(reportingMode, StateManager.getValue("loggedInUserId"));
 			while (upcomingAppointments.next()) {
-				String appointment = String.format("[%s] [%s] \"%s\" %s (%s) - %s %s%n",
+				String appointment = String.format("ID: %d - [%s] [%s] \"%s\" %s (%s) - %s %s%n",
+						upcomingAppointments.getInt("appointmentId"),
 						upcomingAppointments.getTimestamp("start"),
 						upcomingAppointments.getString("type"),
 						upcomingAppointments.getString("title"),
@@ -70,16 +52,28 @@ public class MainViewState implements BasicState {
 	}
 
     public static void run() {
+		String response = "";
 		boolean hasExited = false;
     	while (!hasExited) {
-			InputManager.setValidResponses("1", "2", "3");
+			InputManager.setValidResponses("1", "2", "3", "4", "5", "6", "7");
 			draw();
-			String response = InputManager.waitForValidInput();
-			if (response.equals("1")) reportUpcomingAppointments(ReportingMode.WEEK);
-			if (response.equals("2")) reportUpcomingAppointments(ReportingMode.MONTH);
-			if (response.equals("3")) hasExited = true;
+			response = InputManager.waitForValidInput();
+			if (response.equals("1")) {
+				reportUpcomingAppointments(ReportingMode.WEEK);
+			} else if (response.equals("2")) {
+				reportUpcomingAppointments(ReportingMode.MONTH);
+			} else {
+				hasExited = true;
+			}
 		}
-		StateManager.setCurrentScreen(ScreenCode.EXIT);
+
+    	if (response.equals("3") || response.equals("5")) {
+    		StateManager.setCurrentScreen(ScreenCode.CREATE_RECORD);
+		} else if (response.equals("4") || response.equals("6")) {
+			StateManager.setCurrentScreen(ScreenCode.EDIT_RECORD);
+		} else {
+			StateManager.setCurrentScreen(ScreenCode.EXIT);
+		}
     }
 
     public static void draw() {

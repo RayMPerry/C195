@@ -45,7 +45,7 @@ public class SchedulingApplication {
 		DBManager.connect();
 		if (DBManager.getConnection() == null) System.exit(1);
 		if (!Files.exists(Paths.get(StateManager.LOG_FILE_PATH))) {
-			DBManager.createUser(StateManager.MAGIC_LOGIN, StateManager.MAGIC_LOGIN, "1");
+			DBManager.createDummyData();
 		}
 
 		if (locale.equals("")) {
@@ -67,6 +67,11 @@ public class SchedulingApplication {
 				case MAIN_VIEW:
 					MainViewState.setup();
 					MainViewState.run();
+					break;
+				case CREATE_RECORD:
+				case EDIT_RECORD:
+					UpdateRecordState.setup();
+					UpdateRecordState.run();
 					break;
 				case EXIT:
 					DBManager.closeConnection();
