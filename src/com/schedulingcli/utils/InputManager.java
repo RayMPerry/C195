@@ -13,7 +13,8 @@ public class InputManager {
 	private static Console console = System.console();
 	private static Scanner input = new Scanner(System.in);
 	private static ArrayList<String> validResponses = new ArrayList<>();
-	private static String cancelCommand = "_q";
+
+	public static String cancelCommand = "_q";
 
 	public static void setValidResponsesWithArray(String[] newResponses) {
 		validResponses = new ArrayList<>(Arrays.asList(newResponses));

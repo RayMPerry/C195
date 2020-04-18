@@ -8,5 +8,6 @@ public enum ScreenCode {
 	UPCOMING_APPOINTMENTS,
 	EDIT_RECORD,
 	DELETE_RECORD,
+    REPORTS,
 	EXIT
 }

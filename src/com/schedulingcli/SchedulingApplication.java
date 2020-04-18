@@ -16,6 +16,12 @@ public class SchedulingApplication {
 		StateManager.setValue("loggedInUser", "system");
 		StateManager.setValue("logFilePath", "logs/logins.txt");
 
+		DBManager.connect();
+		if (DBManager.getConnection() == null) System.exit(1);
+		if (!Files.exists(Paths.get(StateManager.LOG_FILE_PATH))) {
+			DBManager.createDummyData();
+		}
+
 		for (int index = 0; index < args.length; index++) {
 			String currentArgument = args[index];
 			String nextArgument;
@@ -28,6 +34,9 @@ public class SchedulingApplication {
 			nextArgument = isValidValue ? args[index + 1] : "";
 			
 			switch (currentArgument) {
+				case "--generate":
+					DBManager.createDummyData();
+					break;
 				case "--locale":
 					if (isValidValue) locale = nextArgument;
 					break;
@@ -38,12 +47,6 @@ public class SchedulingApplication {
 					if (isValidValue) StateManager.setValue("password", nextArgument);
 					break;
 			}
-		}
-		
-		DBManager.connect();
-		if (DBManager.getConnection() == null) System.exit(1);
-		if (!Files.exists(Paths.get(StateManager.LOG_FILE_PATH))) {
-			DBManager.createDummyData();
 		}
 
 		StateManager.setCurrentScreen(locale.equals("") ? ScreenCode.CHOOSE_LOCALE : ScreenCode.LOG_IN);

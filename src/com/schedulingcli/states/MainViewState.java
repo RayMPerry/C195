@@ -9,51 +9,12 @@ import java.util.ArrayList;
 
 public class MainViewState implements BasicState {
     public static void setup(ReportingMode reportingMode) {
-        reportUpcomingAppointments(reportingMode);
-    }
-
-    private static void reportUpcomingAppointments(ReportingMode reportingMode) {
-        String viewFooter = "";
-        switch (reportingMode) {
-            case WEEK:
-                viewFooter = " this week";
-                break;
-            case MONTH:
-                viewFooter = " this month";
-                break;
-        }
-
-        ArrayList<String> listOfAppointments = new ArrayList<>();
-        try {
-            ResultSet upcomingAppointments = DBManager.getUpcomingAppointments(reportingMode, StateManager.getValue("loggedInUserId"));
-            while (upcomingAppointments.next()) {
-                String appointment = String.format("ID: %d - [%s] [%s] \"%s\" %s (%s) - %s %s%n",
-                        upcomingAppointments.getInt("appointmentId"),
-                        upcomingAppointments.getTimestamp("start"),
-                        upcomingAppointments.getString("type"),
-                        upcomingAppointments.getString("title"),
-                        upcomingAppointments.getString("description"),
-                        upcomingAppointments.getString("location"),
-                        upcomingAppointments.getString("contact"),
-                        upcomingAppointments.getString("url"));
-
-                listOfAppointments.add(appointment);
-            }
-        } catch (SQLException err) {
-            err.printStackTrace();
-        }
-
-        System.out.format(ScreenManager.getScreen(ScreenCode.UPCOMING_APPOINTMENTS),
-                listOfAppointments.size(),
-                viewFooter,
-                String.join("", listOfAppointments));
-
-        run();
+        ReportingState.reportUpcomingAppointments(reportingMode);
     }
 
     public static void run() {
         String response = "";
-        InputManager.setValidResponsesWithArguments("1", "2", "3", "4", "5", "6", "7", "8", "9");
+        InputManager.setValidResponsesWithArguments("1", "2", "3", "4", "5", "6", "7", "8", "9", "0");
         draw();
         response = InputManager.waitForValidInput();
         switch (response) {
@@ -77,6 +38,9 @@ public class MainViewState implements BasicState {
                 StateManager.setCurrentScreen(ScreenCode.DELETE_RECORD);
                 break;
             case "9":
+                StateManager.setCurrentScreen(ScreenCode.REPORTS);
+                break;
+            case "0":
 			default:
 				StateManager.setCurrentScreen(ScreenCode.EXIT);
                 break;

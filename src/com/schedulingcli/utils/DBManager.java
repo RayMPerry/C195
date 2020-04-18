@@ -146,7 +146,9 @@ public class DBManager {
         }
 
         try {
-            String formattedString = "SELECT * FROM appointment WHERE userId = %s AND start BETWEEN '%s' and '%s'";
+            String formattedString = "SELECT * FROM appointment " +
+                    "WHERE userId = %s AND start BETWEEN '%s' and '%s' " +
+                    "ORDER BY start ASC";
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             long now = System.currentTimeMillis();
@@ -159,6 +161,52 @@ public class DBManager {
             err.printStackTrace();
         }
 
+        return results;
+    }
+
+    public static ResultSet getNumberOfAppointmentTypes() {
+        ResultSet results = null;
+        try {
+            String sqlQuery = "SELECT type, COUNT(type) as 'number' FROM appointment " +
+                    "GROUP BY type";
+            Statement retrievalStatement = dbConnection.createStatement();
+            results = retrievalStatement.executeQuery(sqlQuery);
+        } catch (SQLException err) {
+            err.printStackTrace();
+        }
+        return results;
+    }
+
+    public static ResultSet getTopThreeBookedLocations() {
+        ResultSet results = null;
+        try {
+            String sqlQuery = "SELECT location, COUNT(location) as 'number' FROM appointment " +
+                    "GROUP BY location " +
+                    "ORDER BY number DESC " +
+                    "LIMIT 3";
+            Statement retrievalStatement = dbConnection.createStatement();
+            results = retrievalStatement.executeQuery(sqlQuery);
+        } catch (SQLException err) {
+            err.printStackTrace();
+        }
+        return results;
+    }
+
+    public static ResultSet getAllAppointmentsByUser() {
+        ResultSet results = null;
+        try {
+            String sqlQuery = "SELECT appt.appointmentId, cstm.customerName, usr.userName, appt.title, " +
+                    "appt.description, appt.location, appt.contact, appt.type, appt.url, appt.start, appt.end " +
+                    "FROM appointment appt " +
+                    "INNER JOIN user usr ON appt.userId = usr.userId " +
+                    "INNER JOIN customer cstm ON appt.customerId = cstm.customerId " +
+                    "GROUP BY appt.appointmentId, usr.userName " +
+                    "ORDER BY appt.start ASC";
+            Statement retrievalStatement = dbConnection.createStatement();
+            results = retrievalStatement.executeQuery(sqlQuery);
+        } catch (SQLException err) {
+            err.printStackTrace();
+        }
         return results;
     }
 
@@ -183,7 +231,7 @@ public class DBManager {
 
     public static void cleanUpPastAppointments() {
         try {
-            String sqlQuery = "DELETE FROM appointment WHERE date < NOW();";
+            String sqlQuery = "DELETE FROM appointment WHERE start < NOW()";
             Statement retrievalStatement = dbConnection.createStatement();
             retrievalStatement.execute(sqlQuery);
         } catch (SQLException err) {

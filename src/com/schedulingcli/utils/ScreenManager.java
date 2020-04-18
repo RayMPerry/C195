@@ -28,7 +28,14 @@ public class ScreenManager {
                         "6) Create a new customer%n" +
                         "7) Edit an existing customer%n" +
                         "8) Delete an existing customer%n" +
-                        "9) Exit%n");
+                        "9) View reports%n" +
+                        "0) Exit%n");
+        screens.put(ScreenCode.REPORTS,
+                "Choose an report:%n" +
+                        "1) Number of appointment types%n" +
+                        "2) Schedule of users for the next week%n" +
+                        "3) Top 3 booked locations%n" +
+                        "4) Exit%n");
 
         isReady = true;
     }
@@ -60,9 +67,10 @@ public class ScreenManager {
             case LOG_IN:
                 LoginState.setup();
                 LoginState.run();
+                MainViewState.setup(ReportingMode.IMMINENT);
                 break;
             case MAIN_VIEW:
-                MainViewState.setup(ReportingMode.IMMINENT);
+                MainViewState.run();
                 break;
             case CREATE_RECORD:
             case EDIT_RECORD:
@@ -72,6 +80,10 @@ public class ScreenManager {
             case DELETE_RECORD:
                 DeleteRecordState.setup();
                 DeleteRecordState.run();
+                break;
+            case REPORTS:
+                ReportingState.setup();
+                ReportingState.run();
                 break;
             case EXIT:
                 DBManager.closeConnection();
