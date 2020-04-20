@@ -16,7 +16,7 @@ public class ScreenManager {
         screens.put(ScreenCode.LOG_IN, "%s: ");
         screens.put(ScreenCode.UPCOMING_APPOINTMENTS, "You have %d upcoming appointments%s.%n%s%n");
         screens.put(ScreenCode.EDIT_RECORD, "Previous %s: %s%n");
-        screens.put(ScreenCode.CREATE_RECORD, "New %s (\"_q\" to cancel): ");
+        screens.put(ScreenCode.CREATE_RECORD, "New %s: ");
         screens.put(ScreenCode.SPECIFY_RECORD, "Specify the ID of the %s you wish to %s (\"_q\" to cancel): %n");
         screens.put(ScreenCode.MAIN_VIEW,
                 "Choose an option:%n" +

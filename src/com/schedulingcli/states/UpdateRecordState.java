@@ -9,15 +9,14 @@ import com.schedulingcli.utils.InputManager;
 import com.schedulingcli.utils.ScreenManager;
 import com.schedulingcli.utils.StateManager;
 
-import javax.swing.plaf.nimbus.State;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 /*
 appointmentId | int(10) AI PK
@@ -47,12 +46,11 @@ lastUpdateBy | varchar(40)
  */
 
 public class UpdateRecordState implements BasicState {
-    private static String itemName = StateManager.getValue("itemName");
+    private static String itemName = "";
     private static Appointment currentAppointment = new Appointment();
     private static Customer currentCustomer = new Customer();
 
-    private static boolean isEditingRecord = StateManager.getCurrentScreen() == ScreenCode.EDIT_RECORD;
-    private static List<String> editOrder;
+    private static boolean isEditingRecord = false;
 
     public static String getFieldValue(String fieldName) {
         String fieldValue = "";
@@ -115,51 +113,195 @@ public class UpdateRecordState implements BasicState {
         return prompts.toArray(String[]::new);
     }
 
-    public static void setup() {
-        if (isEditingRecord) {
-            String[] validIds = DBManager.getEntityIds(itemName).toArray(String[]::new);
-            InputManager.setValidResponsesWithArray(validIds);
-            System.out.format(ScreenManager.getScreen(ScreenCode.SPECIFY_RECORD), itemName, "edit");
-            String response = InputManager.waitForValidInput();
+    public static String[] getStartAndEndDates() {
+        String start = "";
+        String end = "";
+        boolean allDatesValid = false;
+        while (!allDatesValid) {
+            System.out.print("Appointment start: ");
+            start = InputManager.waitForValidDateInput(DBManager.getDateFormat());
+            System.out.print("Appointment end: ");
+            end = InputManager.waitForValidDateInput(DBManager.getDateFormat());
+            if (start.equals(InputManager.cancelCommand) || end.equals(InputManager.cancelCommand)) {
+                break;
+            }
 
             try {
-                ResultSet results;
-                if (itemName.equals(Schema.Appointment.tableName)) {
-                    results = DBManager.retrieveWithCondition(itemName, Schema.Appointment.primaryKeyName, response);
-                    if (results != null && results.next()) currentAppointment = new Appointment(results);
-                }
+                boolean isValidDateRange = Timestamp.valueOf(end).after(Timestamp.valueOf(start));
+                if (!isValidDateRange) throw new Exception("End date must be in the future. Resetting.");
 
-                if (itemName.equals(Schema.Customer.tableName)) {
-                    results = DBManager.retrieveWithCondition(itemName, Schema.Customer.primaryKeyName, response);
-                    if (results != null && results.next()) currentCustomer = new Customer(results);
-                }
-            } catch (SQLException err) {
-                err.printStackTrace();
+                ResultSet results = DBManager.retrieveAllBetweenDates(StateManager.getValue("loggedInUserId"), start, end);
+                if (results != null && results.next()) throw new Exception("Appointments would overlap. Resetting.");
+
+                allDatesValid = true;
+            } catch (Exception err) {
+                start = "";
+                end = "";
+                System.out.println("Appointments would overlap. Resetting.");
             }
+        }
+
+        return new String[]{start, end};
+    }
+
+    public static String promptForForeignKey(String foreignTableName) {
+        String[] validIds = DBManager.getEntityIds(foreignTableName).toArray(String[]::new);
+        InputManager.setValidResponsesWithArray(validIds);
+        InputManager.addToValidResponses("0");
+        System.out.format(ScreenManager.getScreen(ScreenCode.SPECIFY_RECORD), foreignTableName, "use (or \"0\" to create a " + foreignTableName + ")");
+        String response = InputManager.waitForValidInput();
+        String foreignId = response;
+        if (response.equals("0")) {
+            if (foreignTableName.equals("customer")) foreignId = createCustomer();
+            if (foreignTableName.equals("address")) foreignId = createAddress();
+        }
+
+        return foreignId;
+    }
+
+    public static String createAppointment() {
+        String appointmentId = "-1";
+
+        try {
+            String userId = StateManager.getValue("loggedInUserId");
+            String customerId = promptForForeignKey(Schema.Customer.tableName);
+            String[] values = InputManager.aggregateResponses(formatListOfPrompts(
+                    "title",
+                    "description",
+                    "location",
+                    "contact",
+                    "type",
+                    "url"));
+
+            String[] dates = getStartAndEndDates();
+
+            if (isEditingRecord) {
+                appointmentId = String.valueOf(DBManager.updateAppointment(
+                        String.valueOf(currentAppointment.getAppointmentId()),
+                        customerId,
+                        userId,
+                        values[0],
+                        values[1],
+                        values[2],
+                        values[3],
+                        values[4],
+                        values[5],
+                        dates[0],
+                        dates[1]));
+            } else {
+                appointmentId = String.valueOf(DBManager.createAppointment(
+                        customerId,
+                        userId,
+                        values[0],
+                        values[1],
+                        values[2],
+                        values[3],
+                        values[4],
+                        values[5],
+                        dates[0],
+                        dates[1]));
+            }
+
+
+            System.out.format("%nFinished. ID: %s.%n%n", appointmentId);
+        } catch (Exception err) {
+            err.printStackTrace();
+            System.out.println("Could not create or update appointment. Aborting.");
+        }
+
+        return appointmentId;
+    }
+
+    public static String createCustomer() {
+        String[] values;
+        String customerId = "-1";
+        try {
+            String addressId = promptForForeignKey(Schema.Address.tableName);
+            values = InputManager.aggregateResponses(formatListOfPrompts("customerName"));
+            if (isEditingRecord) {
+                customerId = String.valueOf(DBManager.updateCustomer(
+                        String.valueOf(currentCustomer.getCustomerId()),
+                        values[0],
+                        addressId,
+                        "1",
+                        DBManager.getDateFormat().format(currentCustomer.getCreateDate()),
+                        currentCustomer.getCreatedBy(),
+                        DBManager.getDateFormat().format(currentCustomer.getLastUpdate()),
+                        currentCustomer.getLastUpdateBy()));
+            } else {
+                customerId = String.valueOf(DBManager.createCustomer(values[0],
+                        addressId,
+                        "1",
+                        DBManager.getDateFormat().format(currentCustomer.getCreateDate()),
+                        currentCustomer.getCreatedBy(),
+                        DBManager.getDateFormat().format(currentCustomer.getLastUpdate()),
+                        currentCustomer.getLastUpdateBy()));
+            }
+
+            System.out.format("%nFinished. ID: %s.%n%n", customerId);
+        } catch (Exception err) {
+            err.printStackTrace();
+            System.out.println("Could not create or update customer. Aborting.");
+        }
+
+        return customerId;
+    }
+
+    public static String createAddress() {
+        String[] values;
+        String addressId = "-1";
+        try {
+            values = InputManager.aggregateResponses(formatListOfPrompts("country"));
+            String countryId = String.valueOf(DBManager.createCountry(values[0]));
+
+            values = InputManager.aggregateResponses(formatListOfPrompts("city"));
+            String cityId = String.valueOf(DBManager.createCity(values[0], countryId));
+
+            values = InputManager.aggregateResponses(formatListOfPrompts("address", "address2", "postalCode", "phone"));
+            addressId = String.valueOf(DBManager.createAddress(values[0], values[1], cityId, values[2], values[3]));
+
+            System.out.format("%nFinished. ID: %s.%n%n", addressId);
+        } catch (Exception err) {
+            err.printStackTrace();
+            System.out.println("Could not create or update address. Aborting.");
+        }
+
+        return addressId;
+    }
+
+    public static void setup() {
+        isEditingRecord = StateManager.getCurrentScreen() == ScreenCode.EDIT_RECORD;
+        itemName = StateManager.getValue("itemName");
+        if (!isEditingRecord) return;
+
+        String[] validIds = DBManager.getEntityIds(itemName).toArray(String[]::new);
+        InputManager.setValidResponsesWithArray(validIds);
+        System.out.format(ScreenManager.getScreen(ScreenCode.SPECIFY_RECORD), itemName, "edit");
+        String response = InputManager.waitForValidInput();
+
+        try {
+            ResultSet results;
+            if (itemName.equals(Schema.Appointment.tableName)) {
+                results = DBManager.retrieveWithCondition(itemName, Schema.Appointment.primaryKeyName, response);
+                if (results != null && results.next()) currentAppointment = new Appointment(results);
+            }
+
+            if (itemName.equals(Schema.Customer.tableName)) {
+                results = DBManager.retrieveWithCondition(itemName, Schema.Customer.primaryKeyName, response);
+                if (results != null && results.next()) currentCustomer = new Customer(results);
+            }
+        } catch (SQLException err) {
+            err.printStackTrace();
         }
     }
 
     public static void run() {
-        String[] values;
         switch (itemName) {
+            case "appointment":
+                createAppointment();
+                break;
             case "customer":
-                try {
-                    values = InputManager.aggregateResponses(formatListOfPrompts("country"));
-                    String countryId = String.valueOf(DBManager.createCountry(values[0]));
-
-                    values = InputManager.aggregateResponses(formatListOfPrompts("city"));
-                    String cityId = String.valueOf(DBManager.createCity(values[0], countryId));
-
-                    values = InputManager.aggregateResponses(formatListOfPrompts("address", "address2", "postalCode", "phone"));
-                    String addressId = String.valueOf(DBManager.createAddress(values[0], values[1], cityId, values[2], values[3]));
-
-                    values = InputManager.aggregateResponses(formatListOfPrompts("customerName"));
-                    String customerId = String.valueOf(DBManager.createCustomer(values[0], addressId, "1"));
-
-                    System.out.format("%nFinished. ID: %s.%n%n", customerId);
-                } catch (Exception err) {
-                    System.out.println("Returning to main view.");
-                }
+                createCustomer();
                 break;
             default:
                 System.out.println("Not yet.");
@@ -170,7 +312,6 @@ public class UpdateRecordState implements BasicState {
     }
 
     public static void draw() {
-
     }
 
     public static void teardown() {

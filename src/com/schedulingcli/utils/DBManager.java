@@ -39,7 +39,9 @@ public class DBManager {
         return dbConnection;
     }
 
-    public static SimpleDateFormat getDateFormat() { return dateFormat; }
+    public static SimpleDateFormat getDateFormat() {
+        return dateFormat;
+    }
 
     public static void closeConnection() {
         try {
@@ -122,9 +124,29 @@ public class DBManager {
         return retrieve(tableName, null, null);
     }
 
-    public static ResultSet getUpcomingAppointments(ReportingMode reportingMode, String userId) {
+    public static ResultSet retrieveAllBetweenDates(String userId, String start, String end) {
         ResultSet results = null;
 
+        try {
+            String formattedString = "SELECT * FROM appointment " +
+                    "WHERE userId = %s AND start BETWEEN '%s' and '%s' " +
+                    "ORDER BY start ASC";
+            String sqlQuery = String.format(
+                    formattedString,
+                    userId,
+                    dateFormat.format(Timestamp.valueOf(start)),
+                    dateFormat.format(Timestamp.valueOf(end)));
+
+            Statement retrievalStatement = dbConnection.createStatement();
+            results = retrievalStatement.executeQuery(sqlQuery);
+        } catch (SQLException err) {
+            err.printStackTrace();
+        }
+
+        return results;
+    }
+
+    public static ResultSet getUpcomingAppointments(ReportingMode reportingMode, String userId) {
         long interval = 0;
         switch (reportingMode) {
             case IMMINENT:
@@ -138,21 +160,10 @@ public class DBManager {
                 break;
         }
 
-        try {
-            String formattedString = "SELECT * FROM appointment " +
-                    "WHERE userId = %s AND start BETWEEN '%s' and '%s' " +
-                    "ORDER BY start ASC";
-            long now = System.currentTimeMillis();
-            long nowPlusInterval = now + interval;
-            String sqlQuery = String.format(formattedString, userId, dateFormat.format(new Timestamp(now)), dateFormat.format(new Timestamp(nowPlusInterval)));
-
-            Statement retrievalStatement = dbConnection.createStatement();
-            results = retrievalStatement.executeQuery(sqlQuery);
-        } catch (SQLException err) {
-            err.printStackTrace();
-        }
-
-        return results;
+        long now = System.currentTimeMillis();
+        String start = dateFormat.format(new Timestamp(now));
+        String end = dateFormat.format(new Timestamp(now + interval));
+        return retrieveAllBetweenDates(userId, start, end);
     }
 
     public static ResultSet getNumberOfAppointmentTypes() {
@@ -231,23 +242,22 @@ public class DBManager {
     }
 
     public static ArrayList<String> getEntityIds(String tableName) {
-        String itemName = StateManager.getValue("itemName");
         ArrayList<String> validIds = new ArrayList<>();
 
-        ResultSet results = null;
+        ResultSet results;
         try {
-            if (itemName.equals(Schema.Appointment.tableName)) {
-                results = DBManager.retrieveWithCondition(itemName, "userId", StateManager.getValue("loggedInUserId"));
+            if (tableName.equals(Schema.Appointment.tableName)) {
+                results = DBManager.retrieveWithCondition(tableName, "userId", StateManager.getValue("loggedInUserId"));
             } else {
-                results = DBManager.retrieveAll(itemName);
+                results = DBManager.retrieveAll(tableName);
             }
 
             while (results != null && results.next()) {
-                validIds.add(String.valueOf(results.getInt(itemName + "Id")));
+                validIds.add(String.valueOf(results.getInt(tableName + "Id")));
             }
         } catch (SQLException err) {
             err.printStackTrace();
-            System.out.format("Could not retrieve %ss.%n", itemName);
+            System.out.format("Could not retrieve %ss.%n", tableName);
         }
 
         return validIds;
@@ -447,8 +457,8 @@ public class DBManager {
                 if (index == 6) newAppointment.setContact(values[6]);
                 if (index == 7) newAppointment.setType(values[7]);
                 if (index == 8) newAppointment.setUrl(values[8]);
-                if (index == 9) newAppointment.setStart(java.sql.Timestamp.valueOf(values[9]));
-                if (index == 10) newAppointment.setEnd(java.sql.Timestamp.valueOf(values[10]));
+                if (index == 9) newAppointment.setStart(Timestamp.valueOf(values[9]));
+                if (index == 10) newAppointment.setEnd(Timestamp.valueOf(values[10]));
             }
 
             updateStatement.setInt(1, newAppointment.getAppointmentId());
@@ -473,7 +483,11 @@ public class DBManager {
 
             updateStatement.executeUpdate();
             ResultSet results = updateStatement.getGeneratedKeys();
-            if (results.next()) primaryKeyOfAffectedRecord = results.getInt(1);
+            if (results != null && results.next()) {
+                primaryKeyOfAffectedRecord = results.getInt(1);
+            } else if (results != null) {
+                primaryKeyOfAffectedRecord = newAppointment.getAppointmentId();
+            }
         } catch (SQLException err) {
             err.printStackTrace();
             System.err.println("Could not update all values as provided. Refusing to proceed.");
@@ -543,7 +557,11 @@ public class DBManager {
 
             updateStatement.executeUpdate();
             ResultSet results = updateStatement.getGeneratedKeys();
-            if (results.next()) primaryKeyOfAffectedRecord = results.getInt(1);
+            if (results != null && results.next()) {
+                primaryKeyOfAffectedRecord = results.getInt(1);
+            } else if (results != null) {
+                primaryKeyOfAffectedRecord = newCustomer.getCustomerId();
+            }
         } catch (SQLException err) {
             err.printStackTrace();
             System.err.println("Could not update all values as provided. Refusing to proceed.");
@@ -619,7 +637,11 @@ public class DBManager {
 
             updateStatement.executeUpdate();
             ResultSet results = updateStatement.getGeneratedKeys();
-            if (results.next()) primaryKeyOfAffectedRecord = results.getInt(1);
+            if (results != null && results.next()) {
+                primaryKeyOfAffectedRecord = results.getInt(1);
+            } else if (results != null) {
+                primaryKeyOfAffectedRecord = newAddress.getAddressId();
+            }
         } catch (SQLException err) {
             err.printStackTrace();
             System.err.println("Could not update all values as provided. Refusing to proceed.");
@@ -686,7 +708,11 @@ public class DBManager {
 
             updateStatement.executeUpdate();
             ResultSet results = updateStatement.getGeneratedKeys();
-            if (results.next()) primaryKeyOfAffectedRecord = results.getInt(1);
+            if (results != null && results.next()) {
+                primaryKeyOfAffectedRecord = results.getInt(1);
+            } else if (results != null) {
+                primaryKeyOfAffectedRecord = newCity.getCityId();
+            }
         } catch (SQLException err) {
             err.printStackTrace();
             System.err.println("Could not update all values as provided. Refusing to proceed.");
@@ -750,7 +776,11 @@ public class DBManager {
 
             updateStatement.executeUpdate();
             ResultSet results = updateStatement.getGeneratedKeys();
-            if (results.next()) primaryKeyOfAffectedRecord = results.getInt(1);
+            if (results != null && results.next()) {
+                primaryKeyOfAffectedRecord = results.getInt(1);
+            } else if (results != null) {
+                primaryKeyOfAffectedRecord = newCountry.getCountryId();
+            }
         } catch (SQLException err) {
             err.printStackTrace();
             System.err.println("Could not update all values as provided. Refusing to proceed.");
@@ -820,7 +850,11 @@ public class DBManager {
 
             updateStatement.executeUpdate();
             ResultSet results = updateStatement.getGeneratedKeys();
-            if (results.next()) primaryKeyOfAffectedRecord = results.getInt(1);
+            if (results != null && results.next()) {
+                primaryKeyOfAffectedRecord = results.getInt(1);
+            } else if (results != null) {
+                primaryKeyOfAffectedRecord = newUser.getUserId();
+            }
         } catch (SQLException err) {
             err.printStackTrace();
             System.err.println("Could not update all values as provided. Refusing to proceed.");
