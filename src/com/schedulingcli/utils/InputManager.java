@@ -5,9 +5,7 @@ import com.schedulingcli.enums.ScreenCode;
 import java.io.Console;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Scanner;
-import java.util.ArrayList;
+import java.util.*;
 
 public class InputManager {
 	private static Console console = System.console();
@@ -27,6 +25,8 @@ public class InputManager {
 	public static void addToValidResponses(String response) {
 		validResponses.add(response);
 	}
+
+	public static void addToValidResponses(String[] responses) { Collections.addAll(validResponses, responses); }
 
 	public static boolean checkForValidInput(String response) {
 		return response.equals(cancelCommand) || validResponses.contains(response);
@@ -79,6 +79,25 @@ public class InputManager {
 	}
 
 	public static String waitForAnyInput() {
-		return input.nextLine();
+		String response = input.nextLine();
+		if (response.equals(cancelCommand)) response = "";
+		return response;
+	}
+
+	public static String[] aggregateResponses(String... listOfPrompts) {
+		ArrayList<String> allResponses = new ArrayList<>();
+
+		String response;
+		for (String prompt : listOfPrompts) {
+			System.out.format(prompt);
+			response = InputManager.waitForAnyInput();
+			if (response.equals(cancelCommand)) {
+				StateManager.setCurrentScreen(ScreenCode.MAIN_VIEW);
+				break;
+			}
+			allResponses.add(response);
+		}
+
+		return allResponses.toArray(String[]::new);
 	}
 }

@@ -3,9 +3,8 @@ package com.schedulingcli.states;
 import com.schedulingcli.enums.*;
 import com.schedulingcli.utils.*;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MainViewState implements BasicState {
     public static void setup(ReportingMode reportingMode) {
@@ -14,9 +13,19 @@ public class MainViewState implements BasicState {
 
     public static void run() {
         String response = "";
-        InputManager.setValidResponsesWithArguments("1", "2", "3", "4", "5", "6", "7", "8", "9", "0");
+        List<String> appointmentResponses = Arrays.asList("3", "4", "5");
+        List<String> customerResponses = Arrays.asList("6", "7", "8");
+
+        InputManager.setValidResponsesWithArguments("1", "2", "9", "0");
+        InputManager.addToValidResponses(appointmentResponses.toArray(String[]::new));
+        InputManager.addToValidResponses(customerResponses.toArray(String[]::new));
+
         draw();
+
         response = InputManager.waitForValidInput();
+        if (appointmentResponses.contains(response)) StateManager.setValue("itemName", Schema.Appointment.tableName);
+        if (customerResponses.contains(response)) StateManager.setValue("itemName", Schema.Customer.tableName);
+
         switch (response) {
             case "1":
                 setup(ReportingMode.WEEK);
@@ -34,7 +43,6 @@ public class MainViewState implements BasicState {
                 break;
             case "5":
             case "8":
-                StateManager.setValue("itemName", response.equals("5") ? "appointment" : "customer");
                 StateManager.setCurrentScreen(ScreenCode.DELETE_RECORD);
                 break;
             case "9":

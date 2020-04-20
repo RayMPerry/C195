@@ -3,15 +3,20 @@ package com.schedulingcli.utils;
 import java.sql.*;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 
+import com.schedulingcli.entities.*;
 import com.schedulingcli.enums.*;
 
 public class DBManager {
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     private static Connection dbConnection = null;
 
     public static void connect() {
@@ -21,6 +26,7 @@ public class DBManager {
             String password = "53688551183";
 
             dbConnection = DriverManager.getConnection(url, user, password);
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         } catch (SQLException err) {
             System.out.println(err.getMessage());
         } finally {
@@ -32,6 +38,8 @@ public class DBManager {
     public static Connection getConnection() {
         return dbConnection;
     }
+
+    public static SimpleDateFormat getDateFormat() { return dateFormat; }
 
     public static void closeConnection() {
         try {
@@ -86,21 +94,6 @@ public class DBManager {
         return "\'" + input + "\'";
     }
 
-    public static boolean areCredentialsValid(String userName, String password) {
-        boolean isValidLogin = false;
-        ResultSet user = retrieve("user", "userName", quote(userName));
-        try {
-            isValidLogin = user.next() && user.getString("password").equals(password);
-            if (isValidLogin) {
-                StateManager.setValue("loggedInUserId", String.valueOf(user.getInt("userId")));
-                StateManager.setValue("loggedInUser", user.getString("userName"));
-            }
-        } catch (SQLException err) {
-            err.printStackTrace();
-        }
-        return isValidLogin;
-    }
-
     private static ResultSet retrieve(String tableName, String keyName, String keyValue) {
         ResultSet results = null;
         String sqlQuery;
@@ -149,8 +142,6 @@ public class DBManager {
             String formattedString = "SELECT * FROM appointment " +
                     "WHERE userId = %s AND start BETWEEN '%s' and '%s' " +
                     "ORDER BY start ASC";
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
             long now = System.currentTimeMillis();
             long nowPlusInterval = now + interval;
             String sqlQuery = String.format(formattedString, userId, dateFormat.format(new Timestamp(now)), dateFormat.format(new Timestamp(nowPlusInterval)));
@@ -237,6 +228,44 @@ public class DBManager {
         } catch (SQLException err) {
             err.printStackTrace();
         }
+    }
+
+    public static ArrayList<String> getEntityIds(String tableName) {
+        String itemName = StateManager.getValue("itemName");
+        ArrayList<String> validIds = new ArrayList<>();
+
+        ResultSet results = null;
+        try {
+            if (itemName.equals(Schema.Appointment.tableName)) {
+                results = DBManager.retrieveWithCondition(itemName, "userId", StateManager.getValue("loggedInUserId"));
+            } else {
+                results = DBManager.retrieveAll(itemName);
+            }
+
+            while (results != null && results.next()) {
+                validIds.add(String.valueOf(results.getInt(itemName + "Id")));
+            }
+        } catch (SQLException err) {
+            err.printStackTrace();
+            System.out.format("Could not retrieve %ss.%n", itemName);
+        }
+
+        return validIds;
+    }
+
+    public static boolean areCredentialsValid(String userName, String password) {
+        boolean isValidLogin = false;
+        ResultSet user = retrieve("user", "userName", quote(userName));
+        try {
+            isValidLogin = user.next() && user.getString("password").equals(password);
+            if (isValidLogin) {
+                StateManager.setValue("loggedInUserId", String.valueOf(user.getInt("userId")));
+                StateManager.setValue("loggedInUser", user.getString("userName"));
+            }
+        } catch (SQLException err) {
+            err.printStackTrace();
+        }
+        return isValidLogin;
     }
 
     public static void createDummyData() {
@@ -385,25 +414,11 @@ public class DBManager {
 
         String fullStatement = buildStatement(creationMode, schema, getSlotsString(creationMode, schema.columnNames));
 
-        int appointmentId = 0;
-        int customerId = 0;
-        int userId = 0;
-        String title = "";
-        String description = "";
-        String location = "";
-        String contact = "";
-        String type = "";
-        String url = "";
-        Timestamp start = new java.sql.Timestamp(System.currentTimeMillis());
-        Timestamp end = start;
-        Timestamp lastUpdate = end;
-        String lastUpdateBy = StateManager.getValue("loggedInUser");
-        Timestamp createDate = lastUpdate;
-        String createdBy = lastUpdateBy;
+        Appointment newAppointment = new Appointment();
 
         if (creationMode == CreationMode.Create || creationMode == CreationMode.Ensure) {
             values = Stream
-                    .of(new String[]{String.valueOf(appointmentId)}, values)
+                    .of(new String[]{"0"}, values)
                     // While it doesn't look like a lambda, this would be a place you could put a lambda.
                     // Not using the long form because I can use the shorthand to be more "efficient".
                     // The corresponding lambda would be: (value) -> Stream.of(value)
@@ -414,23 +429,7 @@ public class DBManager {
         if (creationMode == CreationMode.Update) {
             try {
                 ResultSet results = retrieveWithCondition(schema.tableName, schema.primaryKeyName, values[0]);
-
-                while (results.next()) {
-                    appointmentId = results.getInt(schema.primaryKeyName);
-                    customerId = results.getInt("customerId");
-                    userId = results.getInt("userId");
-                    title = results.getString("title");
-                    description = results.getString("description");
-                    location = results.getString("location");
-                    contact = results.getString("contact");
-                    type = results.getString("type");
-                    url = results.getString("url");
-                    start = results.getTimestamp("start");
-                    end = results.getTimestamp("end");
-                    createDate = results.getTimestamp("createDate");
-                    createdBy = results.getString("createdBy");
-                }
-
+                if (results != null && results.next()) newAppointment = new Appointment(results);
                 results.close();
             } catch (SQLException err) {
                 err.printStackTrace();
@@ -439,37 +438,37 @@ public class DBManager {
 
         try (PreparedStatement updateStatement = dbConnection.prepareStatement(fullStatement, Statement.RETURN_GENERATED_KEYS)) {
             for (int index = 0; index < values.length; index++) {
-                if (index == 0) appointmentId = Integer.parseInt(values[0]);
-                if (index == 1) customerId = Integer.parseInt(values[1]);
-                if (index == 2) userId = Integer.parseInt(values[2]);
-                if (index == 3) title = values[3];
-                if (index == 4) description = values[4];
-                if (index == 5) location = values[5];
-                if (index == 6) contact = values[6];
-                if (index == 7) type = values[7];
-                if (index == 8) url = values[8];
-                if (index == 9) start = java.sql.Timestamp.valueOf(values[9]);
-                if (index == 10) end = java.sql.Timestamp.valueOf(values[10]);
+                if (index == 0) newAppointment.setAppointmentId(Integer.parseInt(values[0]));
+                if (index == 1) newAppointment.setCustomerId(Integer.parseInt(values[1]));
+                if (index == 2) newAppointment.setUserId(Integer.parseInt(values[2]));
+                if (index == 3) newAppointment.setTitle(values[3]);
+                if (index == 4) newAppointment.setDescription(values[4]);
+                if (index == 5) newAppointment.setLocation(values[5]);
+                if (index == 6) newAppointment.setContact(values[6]);
+                if (index == 7) newAppointment.setType(values[7]);
+                if (index == 8) newAppointment.setUrl(values[8]);
+                if (index == 9) newAppointment.setStart(java.sql.Timestamp.valueOf(values[9]));
+                if (index == 10) newAppointment.setEnd(java.sql.Timestamp.valueOf(values[10]));
             }
 
-            updateStatement.setInt(1, appointmentId);
-            updateStatement.setInt(2, customerId);
-            updateStatement.setInt(3, userId);
-            updateStatement.setString(4, title);
-            updateStatement.setString(5, description);
-            updateStatement.setString(6, location);
-            updateStatement.setString(7, contact);
-            updateStatement.setString(8, type);
-            updateStatement.setString(9, url);
-            updateStatement.setTimestamp(10, start);
-            updateStatement.setTimestamp(11, end);
-            updateStatement.setTimestamp(12, createDate);
-            updateStatement.setString(13, createdBy);
-            updateStatement.setTimestamp(14, lastUpdate);
-            updateStatement.setString(15, lastUpdateBy);
+            updateStatement.setInt(1, newAppointment.getAppointmentId());
+            updateStatement.setInt(2, newAppointment.getCustomerId());
+            updateStatement.setInt(3, newAppointment.getUserId());
+            updateStatement.setString(4, newAppointment.getTitle());
+            updateStatement.setString(5, newAppointment.getDescription());
+            updateStatement.setString(6, newAppointment.getLocation());
+            updateStatement.setString(7, newAppointment.getContact());
+            updateStatement.setString(8, newAppointment.getType());
+            updateStatement.setString(9, newAppointment.getUrl());
+            updateStatement.setTimestamp(10, newAppointment.getStart());
+            updateStatement.setTimestamp(11, newAppointment.getEnd());
+            updateStatement.setTimestamp(12, newAppointment.getCreateDate());
+            updateStatement.setString(13, newAppointment.getCreatedBy());
+            updateStatement.setTimestamp(14, newAppointment.getLastUpdate());
+            updateStatement.setString(15, newAppointment.getLastUpdateBy());
 
             if (creationMode == CreationMode.Update) {
-                updateStatement.setInt(16, appointmentId);
+                updateStatement.setInt(16, newAppointment.getAppointmentId());
             }
 
             updateStatement.executeUpdate();
@@ -495,23 +494,15 @@ public class DBManager {
 			lastUpdateBy | varchar(40)
 		*/
 
-
         int primaryKeyOfAffectedRecord = -1;
 
         String fullStatement = buildStatement(creationMode, schema, getSlotsString(creationMode, schema.columnNames));
 
-        int customerId = 0;
-        String customerName = "";
-        int addressId = 1;
-        int active = 0;
-        Timestamp lastUpdate = new java.sql.Timestamp(System.currentTimeMillis());
-        String lastUpdateBy = StateManager.getValue("loggedInUser");
-        Timestamp createDate = lastUpdate;
-        String createdBy = lastUpdateBy;
+        Customer newCustomer = new Customer();
 
         if (creationMode == CreationMode.Create || creationMode == CreationMode.Ensure) {
             values = Stream
-                    .of(new String[]{String.valueOf(customerId)}, values)
+                    .of(new String[]{"0"}, values)
                     // While it doesn't look like a lambda, this would be a place you could put a lambda.
                     // Not using the long form because I can use the shorthand to be more "efficient".
                     // The corresponding lambda would be: (value) -> Stream.of(value)
@@ -522,16 +513,7 @@ public class DBManager {
         if (creationMode == CreationMode.Update) {
             try {
                 ResultSet results = retrieveWithCondition(schema.tableName, schema.primaryKeyName, values[0]);
-
-                while (results.next()) {
-                    customerId = results.getInt(schema.primaryKeyName);
-                    customerName = results.getString("customerName");
-                    addressId = results.getInt("addressId");
-                    active = results.getInt("active");
-                    createDate = results.getTimestamp("createDate");
-                    createdBy = results.getString("createdBy");
-                }
-
+                if (results != null && results.next()) newCustomer = new Customer(results);
                 results.close();
             } catch (SQLException err) {
                 err.printStackTrace();
@@ -540,23 +522,23 @@ public class DBManager {
 
         try (PreparedStatement updateStatement = dbConnection.prepareStatement(fullStatement, Statement.RETURN_GENERATED_KEYS)) {
             for (int index = 0; index < values.length; index++) {
-                if (index == 0) customerId = Integer.parseInt(values[0]);
-                if (index == 1) customerName = values[1];
-                if (index == 2) addressId = Integer.parseInt(values[2]);
-                if (index == 3) active = Integer.parseInt(values[3]);
+                if (index == 0) newCustomer.setCustomerId(Integer.parseInt(values[0]));
+                if (index == 1) newCustomer.setCustomerName(values[1]);
+                if (index == 2) newCustomer.setAddressId(Integer.parseInt(values[2]));
+                if (index == 3) newCustomer.setActive(Integer.parseInt(values[3]));
             }
 
-            updateStatement.setInt(1, customerId);
-            updateStatement.setString(2, customerName);
-            updateStatement.setInt(3, addressId);
-            updateStatement.setInt(4, active);
-            updateStatement.setTimestamp(5, createDate);
-            updateStatement.setString(6, createdBy);
-            updateStatement.setTimestamp(7, lastUpdate);
-            updateStatement.setString(8, lastUpdateBy);
+            updateStatement.setInt(1, newCustomer.getCustomerId());
+            updateStatement.setString(2, newCustomer.getCustomerName());
+            updateStatement.setInt(3, newCustomer.getAddressId());
+            updateStatement.setInt(4, newCustomer.getActive());
+            updateStatement.setTimestamp(5, newCustomer.getCreateDate());
+            updateStatement.setString(6, newCustomer.getCreatedBy());
+            updateStatement.setTimestamp(7, newCustomer.getLastUpdate());
+            updateStatement.setString(8, newCustomer.getLastUpdateBy());
 
             if (creationMode == CreationMode.Update) {
-                updateStatement.setInt(9, customerId);
+                updateStatement.setInt(9, newCustomer.getCustomerId());
             }
 
             updateStatement.executeUpdate();
@@ -588,20 +570,11 @@ public class DBManager {
 
         String fullStatement = buildStatement(creationMode, schema, getSlotsString(creationMode, schema.columnNames));
 
-        int addressId = 0;
-        String address = "";
-        String address2 = "";
-        int cityId = 0;
-        String postalCode = "";
-        String phone = "";
-        Timestamp lastUpdate = new java.sql.Timestamp(System.currentTimeMillis());
-        String lastUpdateBy = StateManager.getValue("loggedInUser");
-        Timestamp createDate = lastUpdate;
-        String createdBy = lastUpdateBy;
+        Address newAddress = new Address();
 
         if (creationMode == CreationMode.Create || creationMode == CreationMode.Ensure) {
             values = Stream
-                    .of(new String[]{String.valueOf(addressId)}, values)
+                    .of(new String[]{"0"}, values)
                     // While it doesn't look like a lambda, this would be a place you could put a lambda.
                     // Not using the long form because I can use the shorthand to be more "efficient".
                     // The corresponding lambda would be: (value) -> Stream.of(value)
@@ -612,18 +585,7 @@ public class DBManager {
         if (creationMode == CreationMode.Update) {
             try {
                 ResultSet results = retrieveWithCondition(schema.tableName, schema.primaryKeyName, values[0]);
-
-                while (results.next()) {
-                    addressId = results.getInt(schema.primaryKeyName);
-                    address = results.getString("address");
-                    address2 = results.getString("address2");
-                    cityId = results.getInt("cityId");
-                    postalCode = results.getString("postalCode");
-                    phone = results.getString("phone");
-                    createDate = results.getTimestamp("createDate");
-                    createdBy = results.getString("createdBy");
-                }
-
+                if (results != null && results.next()) newAddress = new Address(results);
                 results.close();
             } catch (SQLException err) {
                 err.printStackTrace();
@@ -632,103 +594,27 @@ public class DBManager {
 
         try (PreparedStatement updateStatement = dbConnection.prepareStatement(fullStatement, Statement.RETURN_GENERATED_KEYS)) {
             for (int index = 0; index < values.length; index++) {
-                if (index == 0) addressId = Integer.parseInt(values[0]);
-                if (index == 1) address = values[1];
-                if (index == 2) address2 = values[2];
-                if (index == 3) cityId = Integer.parseInt(values[3]);
-                if (index == 4) postalCode = values[4];
-                if (index == 5) phone = values[5];
+                if (index == 0) newAddress.setAddressId(Integer.parseInt(values[0]));
+                if (index == 1) newAddress.setAddress(values[1]);
+                if (index == 2) newAddress.setAddress2(values[2]);
+                if (index == 3) newAddress.setCityId(Integer.parseInt(values[3]));
+                if (index == 4) newAddress.setPostalCode(values[4]);
+                if (index == 5) newAddress.setPhone(values[5]);
             }
 
-            updateStatement.setInt(1, addressId);
-            updateStatement.setString(2, address);
-            updateStatement.setString(3, address2);
-            updateStatement.setInt(4, cityId);
-            updateStatement.setString(5, postalCode);
-            updateStatement.setString(6, phone);
-            updateStatement.setTimestamp(7, createDate);
-            updateStatement.setString(8, createdBy);
-            updateStatement.setTimestamp(9, lastUpdate);
-            updateStatement.setString(10, lastUpdateBy);
+            updateStatement.setInt(1, newAddress.getAddressId());
+            updateStatement.setString(2, newAddress.getAddress());
+            updateStatement.setString(3, newAddress.getAddress2());
+            updateStatement.setInt(4, newAddress.getCityId());
+            updateStatement.setString(5, newAddress.getPostalCode());
+            updateStatement.setString(6, newAddress.getPhone());
+            updateStatement.setTimestamp(7, newAddress.getCreateDate());
+            updateStatement.setString(8, newAddress.getCreatedBy());
+            updateStatement.setTimestamp(9, newAddress.getLastUpdate());
+            updateStatement.setString(10, newAddress.getLastUpdateBy());
 
             if (creationMode == CreationMode.Update) {
-                updateStatement.setInt(11, addressId);
-            }
-
-            updateStatement.executeUpdate();
-            ResultSet results = updateStatement.getGeneratedKeys();
-            if (results.next()) primaryKeyOfAffectedRecord = results.getInt(1);
-        } catch (SQLException err) {
-            err.printStackTrace();
-            System.err.println("Could not update all values as provided. Refusing to proceed.");
-        }
-
-        return primaryKeyOfAffectedRecord;
-    }
-
-    private static int createOrUpdateCountry(CreationMode creationMode, Schema schema, String[] values) {
-		/*
-			countryId | int(10) AI PK
-			country | varchar(50)
-			createDate | datetime
-			createdBy | varchar(40)
-			lastUpdate | timestamp
-			lastUpdateBy | varchar(40)
-		 */
-
-        int primaryKeyOfAffectedRecord = -1;
-
-        String fullStatement = buildStatement(creationMode, schema, getSlotsString(creationMode, schema.columnNames));
-
-        int countryId = 0;
-        String country = "";
-        Timestamp lastUpdate = new java.sql.Timestamp(System.currentTimeMillis());
-        String lastUpdateBy = StateManager.getValue("loggedInUser");
-        Timestamp createDate = lastUpdate;
-        String createdBy = lastUpdateBy;
-
-        if (creationMode == CreationMode.Create || creationMode == CreationMode.Ensure) {
-            values = Stream
-                    .of(new String[]{String.valueOf(countryId)}, values)
-                    // While it doesn't look like a lambda, this would be a place you could put a lambda.
-                    // Not using the long form because I can use the shorthand to be more "efficient".
-                    // The corresponding lambda would be: (value) -> Stream.of(value)
-                    .flatMap(Stream::of)
-                    .toArray(String[]::new);
-        }
-
-        if (creationMode == CreationMode.Update) {
-            try {
-                ResultSet results = retrieveWithCondition(schema.tableName, schema.primaryKeyName, values[0]);
-
-                while (results.next()) {
-                    countryId = results.getInt(schema.primaryKeyName);
-                    country = results.getString("country");
-                    createDate = results.getTimestamp("createDate");
-                    createdBy = results.getString("createdBy");
-                }
-
-                results.close();
-            } catch (SQLException err) {
-                err.printStackTrace();
-            }
-        }
-
-        try (PreparedStatement updateStatement = dbConnection.prepareStatement(fullStatement, Statement.RETURN_GENERATED_KEYS)) {
-            for (int index = 0; index < values.length; index++) {
-                if (index == 0) countryId = Integer.parseInt(values[0]);
-                if (index == 1) country = values[1];
-            }
-
-            updateStatement.setInt(1, countryId);
-            updateStatement.setString(2, country);
-            updateStatement.setTimestamp(3, createDate);
-            updateStatement.setString(4, createdBy);
-            updateStatement.setTimestamp(5, lastUpdate);
-            updateStatement.setString(6, lastUpdateBy);
-
-            if (creationMode == CreationMode.Update) {
-                updateStatement.setInt(7, countryId);
+                updateStatement.setInt(11, newAddress.getAddressId());
             }
 
             updateStatement.executeUpdate();
@@ -757,17 +643,11 @@ public class DBManager {
 
         String fullStatement = buildStatement(creationMode, schema, getSlotsString(creationMode, schema.columnNames));
 
-        int cityId = 0;
-        String city = "";
-        int countryId = 0;
-        Timestamp lastUpdate = new java.sql.Timestamp(System.currentTimeMillis());
-        String lastUpdateBy = StateManager.getValue("loggedInUser");
-        Timestamp createDate = lastUpdate;
-        String createdBy = lastUpdateBy;
+        City newCity = new City();
 
         if (creationMode == CreationMode.Create || creationMode == CreationMode.Ensure) {
             values = Stream
-                    .of(new String[]{String.valueOf(cityId)}, values)
+                    .of(new String[]{"0"}, values)
                     // While it doesn't look like a lambda, this would be a place you could put a lambda.
                     // Not using the long form because I can use the shorthand to be more "efficient".
                     // The corresponding lambda would be: (value) -> Stream.of(value)
@@ -778,15 +658,7 @@ public class DBManager {
         if (creationMode == CreationMode.Update) {
             try {
                 ResultSet results = retrieveWithCondition(schema.tableName, schema.primaryKeyName, values[0]);
-
-                while (results.next()) {
-                    cityId = results.getInt(schema.primaryKeyName);
-                    city = results.getString("city");
-                    countryId = results.getInt("countryId");
-                    createDate = results.getTimestamp("createDate");
-                    createdBy = results.getString("createdBy");
-                }
-
+                if (results != null && results.next()) newCity = new City(results);
                 results.close();
             } catch (SQLException err) {
                 err.printStackTrace();
@@ -795,21 +667,85 @@ public class DBManager {
 
         try (PreparedStatement updateStatement = dbConnection.prepareStatement(fullStatement, Statement.RETURN_GENERATED_KEYS)) {
             for (int index = 0; index < values.length; index++) {
-                if (index == 0) cityId = Integer.parseInt(values[0]);
-                if (index == 1) city = values[1];
-                if (index == 2) countryId = Integer.parseInt(values[2]);
+                if (index == 0) newCity.setCityId(Integer.parseInt(values[0]));
+                if (index == 1) newCity.setCity(values[1]);
+                if (index == 2) newCity.setCountryId(Integer.parseInt(values[2]));
             }
 
-            updateStatement.setInt(1, cityId);
-            updateStatement.setString(2, city);
-            updateStatement.setInt(3, countryId);
-            updateStatement.setTimestamp(4, createDate);
-            updateStatement.setString(5, createdBy);
-            updateStatement.setTimestamp(6, lastUpdate);
-            updateStatement.setString(7, lastUpdateBy);
+            updateStatement.setInt(1, newCity.getCityId());
+            updateStatement.setString(2, newCity.getCity());
+            updateStatement.setInt(3, newCity.getCountryId());
+            updateStatement.setTimestamp(4, newCity.getCreateDate());
+            updateStatement.setString(5, newCity.getCreatedBy());
+            updateStatement.setTimestamp(6, newCity.getLastUpdate());
+            updateStatement.setString(7, newCity.getLastUpdateBy());
 
             if (creationMode == CreationMode.Update) {
-                updateStatement.setInt(8, countryId);
+                updateStatement.setInt(8, newCity.getCityId());
+            }
+
+            updateStatement.executeUpdate();
+            ResultSet results = updateStatement.getGeneratedKeys();
+            if (results.next()) primaryKeyOfAffectedRecord = results.getInt(1);
+        } catch (SQLException err) {
+            err.printStackTrace();
+            System.err.println("Could not update all values as provided. Refusing to proceed.");
+        }
+
+        return primaryKeyOfAffectedRecord;
+    }
+
+    private static int createOrUpdateCountry(CreationMode creationMode, Schema schema, String[] values) {
+		/*
+			countryId | int(10) AI PK
+			country | varchar(50)
+			createDate | datetime
+			createdBy | varchar(40)
+			lastUpdate | timestamp
+			lastUpdateBy | varchar(40)
+		 */
+
+        int primaryKeyOfAffectedRecord = -1;
+
+        String fullStatement = buildStatement(creationMode, schema, getSlotsString(creationMode, schema.columnNames));
+
+        Country newCountry = new Country();
+
+        if (creationMode == CreationMode.Create || creationMode == CreationMode.Ensure) {
+            values = Stream
+                    .of(new String[]{ "0" }, values)
+                    // While it doesn't look like a lambda, this would be a place you could put a lambda.
+                    // Not using the long form because I can use the shorthand to be more "efficient".
+                    // The corresponding lambda would be: (value) -> Stream.of(value)
+                    .flatMap(Stream::of)
+                    .toArray(String[]::new);
+        }
+
+        if (creationMode == CreationMode.Update) {
+            try {
+                ResultSet results = retrieveWithCondition(schema.tableName, schema.primaryKeyName, values[0]);
+                if (results != null && results.next()) newCountry = new Country(results);
+                results.close();
+            } catch (SQLException err) {
+                err.printStackTrace();
+            }
+        }
+
+        try (PreparedStatement updateStatement = dbConnection.prepareStatement(fullStatement, Statement.RETURN_GENERATED_KEYS)) {
+            for (int index = 0; index < values.length; index++) {
+                if (index == 0) newCountry.setCountryId(Integer.parseInt(values[0]));
+                if (index == 1) newCountry.setCountry(values[1]);
+            }
+
+            updateStatement.setInt(1, newCountry.getCountryId());
+            updateStatement.setString(2, newCountry.getCountry());
+            updateStatement.setTimestamp(3, newCountry.getCreateDate());
+            updateStatement.setString(4, newCountry.getCreatedBy());
+            updateStatement.setTimestamp(5, newCountry.getLastUpdate());
+            updateStatement.setString(6, newCountry.getLastUpdateBy());
+
+            if (creationMode == CreationMode.Update) {
+                updateStatement.setInt(7, newCountry.getCountryId());
             }
 
             updateStatement.executeUpdate();
@@ -839,18 +775,11 @@ public class DBManager {
 
         String fullStatement = buildStatement(creationMode, schema, getSlotsString(creationMode, schema.columnNames));
 
-        int userId = 0;
-        String userName = "";
-        String password = "";
-        int active = 0;
-        Timestamp lastUpdate = new java.sql.Timestamp(System.currentTimeMillis());
-        String lastUpdateBy = StateManager.getValue("loggedInUser");
-        Timestamp createDate = lastUpdate;
-        String createdBy = lastUpdateBy;
+        User newUser = new User();
 
         if (creationMode == CreationMode.Create || creationMode == CreationMode.Ensure) {
             values = Stream
-                    .of(new String[]{String.valueOf(userId)}, values)
+                    .of(new String[]{ "0" }, values)
                     // While it doesn't look like a lambda, this would be a place you could put a lambda.
                     // Not using the long form because I can use the shorthand to be more "efficient".
                     // The corresponding lambda would be: (value) -> Stream.of(value)
@@ -861,16 +790,7 @@ public class DBManager {
         if (creationMode == CreationMode.Update) {
             try {
                 ResultSet results = retrieveWithCondition(schema.tableName, schema.primaryKeyName, values[0]);
-
-                while (results.next()) {
-                    userId = results.getInt(schema.primaryKeyName);
-                    userName = results.getString("userName");
-                    password = results.getString("password");
-                    active = results.getInt("active");
-                    createDate = results.getTimestamp("createDate");
-                    createdBy = results.getString("createdBy");
-                }
-
+                if (results != null && results.next()) newUser = new User(results);
                 results.close();
             } catch (SQLException err) {
                 err.printStackTrace();
@@ -879,23 +799,23 @@ public class DBManager {
 
         try (PreparedStatement updateStatement = dbConnection.prepareStatement(fullStatement, Statement.RETURN_GENERATED_KEYS)) {
             for (int index = 0; index < values.length; index++) {
-                if (index == 0) userId = Integer.parseInt(values[0]);
-                if (index == 1) userName = values[1];
-                if (index == 2) password = values[2];
-                if (index == 3) active = Integer.parseInt(values[3]);
+                if (index == 0) newUser.setUserId(Integer.parseInt(values[0]));
+                if (index == 1) newUser.setUserName(values[1]);
+                if (index == 2) newUser.setPassword(values[2]);
+                if (index == 3) newUser.setActive(Integer.parseInt(values[3]));
             }
 
-            updateStatement.setInt(1, userId);
-            updateStatement.setString(2, userName);
-            updateStatement.setString(3, password);
-            updateStatement.setInt(4, active);
-            updateStatement.setTimestamp(5, createDate);
-            updateStatement.setString(6, createdBy);
-            updateStatement.setTimestamp(7, lastUpdate);
-            updateStatement.setString(8, lastUpdateBy);
+            updateStatement.setInt(1, newUser.getUserId());
+            updateStatement.setString(2, newUser.getUserName());
+            updateStatement.setString(3, newUser.getPassword());
+            updateStatement.setInt(4, newUser.getActive());
+            updateStatement.setTimestamp(5, newUser.getCreateDate());
+            updateStatement.setString(6, newUser.getCreatedBy());
+            updateStatement.setTimestamp(7, newUser.getLastUpdate());
+            updateStatement.setString(8, newUser.getLastUpdateBy());
 
             if (creationMode == CreationMode.Update) {
-                updateStatement.setInt(9, userId);
+                updateStatement.setInt(9, newUser.getUserId());
             }
 
             updateStatement.executeUpdate();

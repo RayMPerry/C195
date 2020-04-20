@@ -6,9 +6,9 @@ import com.schedulingcli.utils.InputManager;
 import com.schedulingcli.utils.ScreenManager;
 import com.schedulingcli.utils.StateManager;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class DeleteRecordState implements BasicState {
     private static String itemName;
@@ -16,21 +16,7 @@ public class DeleteRecordState implements BasicState {
 
     public static void setup() {
         itemName = StateManager.getValue("itemName");
-        ResultSet results = null;
-        try {
-            if (itemName.equals("appointment")) {
-                results = DBManager.retrieveWithCondition(itemName, "userId", StateManager.getValue("loggedInUserId"));
-            } else {
-                results = DBManager.retrieveAll(itemName);
-            }
-
-            while (results != null && results.next()) {
-                validIds.add(String.valueOf(results.getInt(itemName + "Id")));
-            }
-        } catch (SQLException err) {
-            err.printStackTrace();
-            System.out.format("Could not retrieve %ss.%n", itemName);
-        }
+        validIds = DBManager.getEntityIds(itemName);
     }
 
     public static void run() {
@@ -45,8 +31,7 @@ public class DeleteRecordState implements BasicState {
     }
 
     public static void draw() {
-        System.out.format(ScreenManager.getCurrentScreen(), StateManager.getValue("itemName"));
-
+        System.out.format(ScreenManager.getScreen(ScreenCode.SPECIFY_RECORD), itemName, "delete");
     }
 
     public static void teardown() {

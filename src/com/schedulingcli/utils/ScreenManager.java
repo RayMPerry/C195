@@ -15,9 +15,9 @@ public class ScreenManager {
         screens.put(ScreenCode.CHOOSE_LOCALE, "%n1) %s%n2) %s%nPlease choose your language:%nPor favor elige tu idioma:%n");
         screens.put(ScreenCode.LOG_IN, "%s: ");
         screens.put(ScreenCode.UPCOMING_APPOINTMENTS, "You have %d upcoming appointments%s.%n%s%n");
-        screens.put(ScreenCode.CREATE_RECORD, "%s (\"_q\" to cancel)? ");
-        screens.put(ScreenCode.EDIT_RECORD, "New %s (\"_q\" to cancel)? ");
-        screens.put(ScreenCode.DELETE_RECORD, "Specify the ID of the %s you wish to delete (\"_q\" to cancel): %n");
+        screens.put(ScreenCode.EDIT_RECORD, "Previous %s: %s%n");
+        screens.put(ScreenCode.CREATE_RECORD, "New %s (\"_q\" to cancel): ");
+        screens.put(ScreenCode.SPECIFY_RECORD, "Specify the ID of the %s you wish to %s (\"_q\" to cancel): %n");
         screens.put(ScreenCode.MAIN_VIEW,
                 "Choose an option:%n" +
                         "1) View appointments by week%n" +
