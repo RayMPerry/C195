@@ -3,6 +3,12 @@ package com.schedulingcli.utils;
 import java.sql.*;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
+import java.time.temporal.TemporalField;
+import java.time.temporal.TemporalUnit;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -124,16 +130,27 @@ public class DBManager {
         return retrieve(tableName, null, null);
     }
 
-    public static ResultSet retrieveAllBetweenDates(String userId, String start, String end) {
+    public static ResultSet retrieveAllBetweenDates(String appointmentId, String userId, String start, String end) {
         ResultSet results = null;
 
         try {
+            String inclusiveAppointmentClause = "OR end BETWEEN STR_TO_DATE('%s', '%%Y-%%m-%%d %%H:%%i:%%s') " +
+                    "AND STR_TO_DATE('%s', '%%Y-%%m-%%d %%H:%%i:%%s') ";
+
             String formattedString = "SELECT * FROM appointment " +
-                    "WHERE userId = %s AND start BETWEEN '%s' and '%s' " +
+                    "WHERE userId = %s " +
+                    (appointmentId != null ? "AND appointmentId != %s " : "/* %s */ ") +
+                    "AND start BETWEEN STR_TO_DATE('%s', '%%Y-%%m-%%d %%H:%%i:%%s') " +
+                    "AND STR_TO_DATE('%s', '%%Y-%%m-%%d %%H:%%i:%%s') " +
+                    (appointmentId != null ? inclusiveAppointmentClause : "") +
                     "ORDER BY start ASC";
+
             String sqlQuery = String.format(
                     formattedString,
                     userId,
+                    appointmentId,
+                    dateFormat.format(Timestamp.valueOf(start)),
+                    dateFormat.format(Timestamp.valueOf(end)),
                     dateFormat.format(Timestamp.valueOf(start)),
                     dateFormat.format(Timestamp.valueOf(end)));
 
@@ -147,23 +164,28 @@ public class DBManager {
     }
 
     public static ResultSet getUpcomingAppointments(ReportingMode reportingMode, String userId) {
-        long interval = 0;
+        TemporalField usField = WeekFields.of(java.util.Locale.US).dayOfWeek();
+        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime futureDate = currentDate;
         switch (reportingMode) {
             case IMMINENT:
-                interval = TimeUnit.MINUTES.toMillis(15);
+                futureDate = currentDate.plusMinutes(15);
                 break;
             case WEEK:
-                interval = TimeUnit.DAYS.toMillis(7);
+                currentDate = LocalDateTime.now().with(usField, 1);
+                futureDate = LocalDateTime.now().with(usField, 7);
                 break;
             case MONTH:
-                interval = TimeUnit.DAYS.toMillis(30);
+                currentDate = LocalDateTime.now().with(TemporalAdjusters.firstDayOfMonth());
+                futureDate = LocalDateTime.now().with(TemporalAdjusters.lastDayOfMonth());
                 break;
         }
 
-        long now = System.currentTimeMillis();
-        String start = dateFormat.format(new Timestamp(now));
-        String end = dateFormat.format(new Timestamp(now + interval));
-        return retrieveAllBetweenDates(userId, start, end);
+        SimpleDateFormat dumbDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String start = dumbDateFormat.format(Timestamp.valueOf(currentDate));
+        String end = dumbDateFormat.format(Timestamp.valueOf(futureDate));
+
+        return retrieveAllBetweenDates(null, userId, start, end);
     }
 
     public static ResultSet getNumberOfAppointmentTypes() {
@@ -739,7 +761,7 @@ public class DBManager {
 
         if (creationMode == CreationMode.Create || creationMode == CreationMode.Ensure) {
             values = Stream
-                    .of(new String[]{ "0" }, values)
+                    .of(new String[]{"0"}, values)
                     // While it doesn't look like a lambda, this would be a place you could put a lambda.
                     // Not using the long form because I can use the shorthand to be more "efficient".
                     // The corresponding lambda would be: (value) -> Stream.of(value)
@@ -809,7 +831,7 @@ public class DBManager {
 
         if (creationMode == CreationMode.Create || creationMode == CreationMode.Ensure) {
             values = Stream
-                    .of(new String[]{ "0" }, values)
+                    .of(new String[]{"0"}, values)
                     // While it doesn't look like a lambda, this would be a place you could put a lambda.
                     // Not using the long form because I can use the shorthand to be more "efficient".
                     // The corresponding lambda would be: (value) -> Stream.of(value)

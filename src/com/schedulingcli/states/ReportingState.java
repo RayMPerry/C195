@@ -72,7 +72,7 @@ public class ReportingState implements BasicState {
     }
 
     public static void reportUpcomingAppointments(ReportingMode reportingMode) {
-        String viewFooter = "";
+        String viewFooter = " coming up";
         switch (reportingMode) {
             case WEEK:
                 viewFooter = " this week";

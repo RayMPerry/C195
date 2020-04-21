@@ -49,7 +49,22 @@ public class SchedulingApplication {
 			}
 		}
 
-		StateManager.setCurrentScreen(locale.equals("") ? ScreenCode.CHOOSE_LOCALE : ScreenCode.LOG_IN);
+		if (locale.isEmpty()) locale = java.util.Locale.getDefault().toString();
+
+		switch (locale) {
+			case "es_ES":
+				LocaleManager.loadLocale(Locale.ES_ES);
+				break;
+			case "en_US":
+				LocaleManager.loadLocale(Locale.EN_US);
+				break;
+			default:
+				System.out.format("No suitable language found for %s.", java.util.Locale.getDefault().getDisplayLanguage());
+				StateManager.setCurrentScreen(ScreenCode.CHOOSE_LOCALE);
+				break;
+		}
+
+		StateManager.setCurrentScreen(ScreenCode.LOG_IN);
 		StateManager.startApplication();
 
 		while (StateManager.isApplicationRunning()) {

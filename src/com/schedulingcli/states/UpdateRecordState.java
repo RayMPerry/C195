@@ -130,14 +130,25 @@ public class UpdateRecordState implements BasicState {
                 boolean isValidDateRange = Timestamp.valueOf(end).after(Timestamp.valueOf(start));
                 if (!isValidDateRange) throw new Exception("End date must be in the future. Resetting.");
 
-                ResultSet results = DBManager.retrieveAllBetweenDates(StateManager.getValue("loggedInUserId"), start, end);
+                ResultSet results = DBManager.retrieveAllBetweenDates(
+                        String.valueOf(currentAppointment.getAppointmentId()),
+                        StateManager.getValue("loggedInUserId"),
+                        start,
+                        end);
+
                 if (results != null && results.next()) throw new Exception("Appointments would overlap. Resetting.");
+
+                if (!InputManager.areDatesDuringBusinessHours(start, end)) {
+                    throw new Exception(String.format("Appointment is outside of business hours (%s - %s).",
+                            StateManager.BUSINESS_OPEN,
+                            StateManager.BUSINESS_CLOSE));
+                }
 
                 allDatesValid = true;
             } catch (Exception err) {
                 start = "";
                 end = "";
-                System.out.println("Appointments would overlap. Resetting.");
+                System.out.println(err.getMessage());
             }
         }
 
@@ -217,7 +228,7 @@ public class UpdateRecordState implements BasicState {
         String customerId = "-1";
         try {
             String addressId = promptForForeignKey(Schema.Address.tableName);
-            values = InputManager.aggregateResponses(formatListOfPrompts("customerName"));
+            values = InputManager.aggregateResponses(formatListOfPrompts("customerName"), true);
             if (isEditingRecord) {
                 customerId = String.valueOf(DBManager.updateCustomer(
                         String.valueOf(currentCustomer.getCustomerId()),
@@ -251,13 +262,13 @@ public class UpdateRecordState implements BasicState {
         String[] values;
         String addressId = "-1";
         try {
-            values = InputManager.aggregateResponses(formatListOfPrompts("country"));
+            values = InputManager.aggregateResponses(formatListOfPrompts("country"), true);
             String countryId = String.valueOf(DBManager.createCountry(values[0]));
 
-            values = InputManager.aggregateResponses(formatListOfPrompts("city"));
+            values = InputManager.aggregateResponses(formatListOfPrompts("city"), true);
             String cityId = String.valueOf(DBManager.createCity(values[0], countryId));
 
-            values = InputManager.aggregateResponses(formatListOfPrompts("address", "address2", "postalCode", "phone"));
+            values = InputManager.aggregateResponses(formatListOfPrompts("address", "address2", "postalCode", "phone"), true);
             addressId = String.valueOf(DBManager.createAddress(values[0], values[1], cityId, values[2], values[3]));
 
             System.out.format("%nFinished. ID: %s.%n%n", addressId);

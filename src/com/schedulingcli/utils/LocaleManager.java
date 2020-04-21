@@ -22,7 +22,7 @@ public class LocaleManager {
 		spanishMessages.put(MessageCode.USERNAME, "Nombre de usuario");
 		spanishMessages.put(MessageCode.PASSWORD, "Contraseña");
 
-		currentMessages = locale == Locale.ES_ME ? spanishMessages : englishMessages;
+		currentMessages = locale == Locale.ES_ES ? spanishMessages : englishMessages;
 
 		System.out.format("Loaded %s locale.%n", locale.dialect);
 		currentLocale = locale;

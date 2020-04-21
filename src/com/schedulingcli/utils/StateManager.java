@@ -13,6 +13,8 @@ public class StateManager {
 	public static final int MAXIMUM_LOGIN_ATTEMPTS = 3;
 	public static final String MAGIC_LOGIN = "test";
 	public static final String LOG_FILE_PATH = "logs/logins.txt";
+	public static final String BUSINESS_OPEN = "09:00:00";
+	public static final String BUSINESS_CLOSE = "17:00:00";
 
 	public static ApplicationStatus getApplicationStatus() {
 		return applicationStatus;

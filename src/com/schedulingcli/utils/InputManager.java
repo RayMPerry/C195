@@ -3,6 +3,7 @@ package com.schedulingcli.utils;
 import com.schedulingcli.enums.ScreenCode;
 
 import java.io.Console;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -38,6 +39,29 @@ public class InputManager {
         boolean isValid = response.equals(cancelCommand) || validResponses.contains(response);
         if (!isValid) System.out.println(errorMessage);
         return isValid;
+    }
+
+    public static boolean areDatesDuringBusinessHours(String start, String end) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Timestamp startingTimestamp = Timestamp.valueOf(start);
+        Timestamp endingTimestamp = Timestamp.valueOf(end);
+
+        String startDate = dateFormat.format(startingTimestamp);
+        boolean onSameDay = startDate.equals(dateFormat.format(endingTimestamp));
+
+        Timestamp openingTimestamp = Timestamp.valueOf(String.format("%s %s", startDate, StateManager.BUSINESS_OPEN));
+        Timestamp closingTimestamp = Timestamp.valueOf(String.format("%s %s", startDate, StateManager.BUSINESS_CLOSE));
+
+        long appointmentStartTime = startingTimestamp.toInstant().toEpochMilli();
+        long appointmentEndTime = endingTimestamp.toInstant().toEpochMilli();
+        long businessOpen = openingTimestamp.toInstant().toEpochMilli();
+        long businessClose = closingTimestamp.toInstant().toEpochMilli();
+
+        return onSameDay
+                && appointmentStartTime >= businessOpen
+                && appointmentStartTime < businessClose
+                && appointmentEndTime <= businessClose
+                && appointmentEndTime > businessOpen;
     }
 
     public static String waitForValidDateInput(SimpleDateFormat dateFormat) {
@@ -86,13 +110,26 @@ public class InputManager {
         return response;
     }
 
-    public static String[] aggregateResponses(String... listOfPrompts) {
+    public static String waitForNonEmptyInput() {
+        String response = "";
+        while (response.isEmpty()) {
+            response = input.nextLine();
+            if (response.isEmpty()) System.out.print("Please enter a value: ");
+        }
+        return response;
+    }
+
+    public static String[] aggregateResponses(String[] listOfPrompts) {
+        return aggregateResponses(listOfPrompts, false);
+    }
+
+    public static String[] aggregateResponses(String[] listOfPrompts, boolean ensureNonEmptyResponses) {
         ArrayList<String> allResponses = new ArrayList<>();
 
         String response;
         for (String prompt : listOfPrompts) {
             System.out.format(prompt);
-            response = InputManager.waitForAnyInput();
+            response = ensureNonEmptyResponses ? InputManager.waitForNonEmptyInput() : InputManager.waitForAnyInput();
             allResponses.add(response);
         }
 
