@@ -1,9 +1,9 @@
 package com.schedulingcli.states;
 
+import com.schedulingcli.enums.MessageCode;
+import com.schedulingcli.enums.ScreenCode;
 import com.schedulingcli.utils.*;
-import com.schedulingcli.enums.*;
 
-import javax.swing.plaf.nimbus.State;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

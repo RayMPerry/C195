@@ -1,9 +1,10 @@
 package com.schedulingcli.utils;
 
-import com.schedulingcli.enums.*;
+import com.schedulingcli.enums.Locale;
+import com.schedulingcli.enums.MessageCode;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 public class LocaleManager {
 	private static Map<MessageCode, String> englishMessages = new HashMap<>();

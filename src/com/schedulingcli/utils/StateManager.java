@@ -1,9 +1,10 @@
 package com.schedulingcli.utils;
 
-import java.util.Map;
-import java.util.HashMap;
+import com.schedulingcli.enums.ApplicationStatus;
+import com.schedulingcli.enums.ScreenCode;
 
-import com.schedulingcli.enums.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class StateManager {
 	private static ApplicationStatus applicationStatus = ApplicationStatus.STOPPED;

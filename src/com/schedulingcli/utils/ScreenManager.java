@@ -1,11 +1,11 @@
 package com.schedulingcli.utils;
 
-import java.util.Map;
-import java.util.HashMap;
-
 import com.schedulingcli.enums.ReportingMode;
 import com.schedulingcli.enums.ScreenCode;
 import com.schedulingcli.states.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ScreenManager {
     private static Map<ScreenCode, String> screens = new HashMap<>();

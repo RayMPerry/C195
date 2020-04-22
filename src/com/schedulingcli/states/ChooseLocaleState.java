@@ -1,7 +1,11 @@
 package com.schedulingcli.states;
 
-import com.schedulingcli.enums.*;
-import com.schedulingcli.utils.*;
+import com.schedulingcli.enums.Locale;
+import com.schedulingcli.enums.ScreenCode;
+import com.schedulingcli.utils.InputManager;
+import com.schedulingcli.utils.LocaleManager;
+import com.schedulingcli.utils.ScreenManager;
+import com.schedulingcli.utils.StateManager;
 
 public class ChooseLocaleState implements BasicState {
 	public static void setup() {

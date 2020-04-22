@@ -9,14 +9,10 @@ import com.schedulingcli.utils.InputManager;
 import com.schedulingcli.utils.ScreenManager;
 import com.schedulingcli.utils.StateManager;
 
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /*
 appointmentId | int(10) AI PK

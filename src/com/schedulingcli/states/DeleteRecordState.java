@@ -7,8 +7,6 @@ import com.schedulingcli.utils.ScreenManager;
 import com.schedulingcli.utils.StateManager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class DeleteRecordState implements BasicState {
     private static String itemName;

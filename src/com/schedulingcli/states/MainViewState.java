@@ -1,7 +1,11 @@
 package com.schedulingcli.states;
 
-import com.schedulingcli.enums.*;
-import com.schedulingcli.utils.*;
+import com.schedulingcli.enums.ReportingMode;
+import com.schedulingcli.enums.Schema;
+import com.schedulingcli.enums.ScreenCode;
+import com.schedulingcli.utils.InputManager;
+import com.schedulingcli.utils.ScreenManager;
+import com.schedulingcli.utils.StateManager;
 
 import java.util.Arrays;
 import java.util.List;

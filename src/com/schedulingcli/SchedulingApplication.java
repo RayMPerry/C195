@@ -1,8 +1,11 @@
 package com.schedulingcli;
 
-import com.schedulingcli.utils.*;
-import com.schedulingcli.enums.*;
-import com.schedulingcli.states.*;
+import com.schedulingcli.enums.Locale;
+import com.schedulingcli.enums.ScreenCode;
+import com.schedulingcli.utils.DBManager;
+import com.schedulingcli.utils.LocaleManager;
+import com.schedulingcli.utils.ScreenManager;
+import com.schedulingcli.utils.StateManager;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;

@@ -1,24 +1,23 @@
 package com.schedulingcli.utils;
 
-import java.sql.*;
+import com.schedulingcli.entities.*;
+import com.schedulingcli.enums.CreationMode;
+import com.schedulingcli.enums.ReportingMode;
+import com.schedulingcli.enums.Schema;
 
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.time.temporal.TemporalField;
-import java.time.temporal.TemporalUnit;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 import java.util.stream.Collectors;
-
-import com.schedulingcli.entities.*;
-import com.schedulingcli.enums.*;
+import java.util.stream.Stream;
 
 public class DBManager {
     private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -59,8 +58,7 @@ public class DBManager {
 
     private static String getSlotsString(CreationMode creationMode, String[] columnNames) {
         return Arrays
-                .asList(columnNames)
-                .stream()
+                .stream(columnNames)
                 // The following lambda is simpler than declaring a method on class for the sole purpose using it once.
                 // This returns a number of "slots" for the SQL statement we're creating.
                 .map(columnName -> creationMode == CreationMode.Update ? String.format("%s = ?", columnName) : "?")
@@ -99,7 +97,7 @@ public class DBManager {
     }
 
     public static String quote(String input) {
-        return "\'" + input + "\'";
+        return "'" + input + "'";
     }
 
     private static ResultSet retrieve(String tableName, String keyName, String keyValue) {
@@ -134,15 +132,15 @@ public class DBManager {
         ResultSet results = null;
 
         try {
-            String inclusiveAppointmentClause = "OR end BETWEEN STR_TO_DATE('%s', '%%Y-%%m-%%d %%H:%%i:%%s') " +
-                    "AND STR_TO_DATE('%s', '%%Y-%%m-%%d %%H:%%i:%%s') ";
+            String inclusiveAppointmentClause = " OR end BETWEEN STR_TO_DATE('%s', '%%Y-%%m-%%d %%H:%%i:%%s') " +
+                    "AND STR_TO_DATE('%s', '%%Y-%%m-%%d %%H:%%i:%%s')) ";
 
             String formattedString = "SELECT * FROM appointment " +
                     "WHERE userId = %s " +
                     (appointmentId != null ? "AND appointmentId != %s " : "/* %s */ ") +
-                    "AND start BETWEEN STR_TO_DATE('%s', '%%Y-%%m-%%d %%H:%%i:%%s') " +
-                    "AND STR_TO_DATE('%s', '%%Y-%%m-%%d %%H:%%i:%%s') " +
-                    (appointmentId != null ? inclusiveAppointmentClause : "") +
+                    "AND (start BETWEEN STR_TO_DATE('%s', '%%Y-%%m-%%d %%H:%%i:%%s') " +
+                    "AND STR_TO_DATE('%s', '%%Y-%%m-%%d %%H:%%i:%%s')" +
+                    (appointmentId != null ? inclusiveAppointmentClause : ") ") +
                     "ORDER BY start ASC";
 
             String sqlQuery = String.format(
@@ -172,12 +170,12 @@ public class DBManager {
                 futureDate = currentDate.plusMinutes(15);
                 break;
             case WEEK:
-                currentDate = LocalDateTime.now().with(usField, 1);
-                futureDate = LocalDateTime.now().with(usField, 7);
+                currentDate = LocalDate.now().atTime(0, 0).with(usField, 1);
+                futureDate = currentDate.with(usField, 7).plusDays(1);
                 break;
             case MONTH:
-                currentDate = LocalDateTime.now().with(TemporalAdjusters.firstDayOfMonth());
-                futureDate = LocalDateTime.now().with(TemporalAdjusters.lastDayOfMonth());
+                currentDate = LocalDate.now().atTime(0, 0).with(TemporalAdjusters.firstDayOfMonth());
+                futureDate = currentDate.with(TemporalAdjusters.lastDayOfMonth()).plusDays(1);
                 break;
         }
 
@@ -461,8 +459,10 @@ public class DBManager {
         if (creationMode == CreationMode.Update) {
             try {
                 ResultSet results = retrieveWithCondition(schema.tableName, schema.primaryKeyName, values[0]);
-                if (results != null && results.next()) newAppointment = new Appointment(results);
-                results.close();
+                if (results != null && results.next()) {
+                    newAppointment = new Appointment(results);
+                    results.close();
+                }
             } catch (SQLException err) {
                 err.printStackTrace();
             }
@@ -549,8 +549,10 @@ public class DBManager {
         if (creationMode == CreationMode.Update) {
             try {
                 ResultSet results = retrieveWithCondition(schema.tableName, schema.primaryKeyName, values[0]);
-                if (results != null && results.next()) newCustomer = new Customer(results);
-                results.close();
+                if (results != null && results.next()) {
+                    newCustomer = new Customer(results);
+                    results.close();
+                }
             } catch (SQLException err) {
                 err.printStackTrace();
             }
@@ -625,8 +627,10 @@ public class DBManager {
         if (creationMode == CreationMode.Update) {
             try {
                 ResultSet results = retrieveWithCondition(schema.tableName, schema.primaryKeyName, values[0]);
-                if (results != null && results.next()) newAddress = new Address(results);
-                results.close();
+                if (results != null && results.next()) {
+                    newAddress = new Address(results);
+                    results.close();
+                }
             } catch (SQLException err) {
                 err.printStackTrace();
             }
@@ -702,8 +706,10 @@ public class DBManager {
         if (creationMode == CreationMode.Update) {
             try {
                 ResultSet results = retrieveWithCondition(schema.tableName, schema.primaryKeyName, values[0]);
-                if (results != null && results.next()) newCity = new City(results);
-                results.close();
+                if (results != null && results.next()) {
+                    newCity = new City(results);
+                    results.close();
+                }
             } catch (SQLException err) {
                 err.printStackTrace();
             }
@@ -772,8 +778,10 @@ public class DBManager {
         if (creationMode == CreationMode.Update) {
             try {
                 ResultSet results = retrieveWithCondition(schema.tableName, schema.primaryKeyName, values[0]);
-                if (results != null && results.next()) newCountry = new Country(results);
-                results.close();
+                if (results != null && results.next()) {
+                    newCountry = new Country(results);
+                    results.close();
+                }
             } catch (SQLException err) {
                 err.printStackTrace();
             }
@@ -842,8 +850,10 @@ public class DBManager {
         if (creationMode == CreationMode.Update) {
             try {
                 ResultSet results = retrieveWithCondition(schema.tableName, schema.primaryKeyName, values[0]);
-                if (results != null && results.next()) newUser = new User(results);
-                results.close();
+                if (results != null && results.next()) {
+                    newUser = new User(results);
+                    results.close();
+                }
             } catch (SQLException err) {
                 err.printStackTrace();
             }
