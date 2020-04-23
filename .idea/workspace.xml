@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="b125ebe0-87b0-4d33-b110-596cc4aa13ec" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/states/UpdateRecordState.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/states/UpdateRecordState.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/schedulingcli/utils/DBManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/com/schedulingcli/utils/DBManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
