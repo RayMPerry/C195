@@ -161,6 +161,33 @@ public class DBManager {
         return results;
     }
 
+    public static ResultSet retrieveAllOverlappingAppointments(String appointmentId, String userId, String start) {
+        ResultSet results = null;
+
+        try {
+            String formattedString = "SELECT * FROM appointment " +
+                    "WHERE userId = %s " +
+                    (appointmentId != null ? "AND appointmentId != %s " : "/* %s */ ") +
+                    "AND (start <= STR_TO_DATE('%s', '%%Y-%%m-%%d %%H:%%i:%%s') " +
+                    "AND end > STR_TO_DATE('%s', '%%Y-%%m-%%d %%H:%%i:%%s')) " +
+                    "ORDER BY start ASC";
+
+            String sqlQuery = String.format(
+                    formattedString,
+                    userId,
+                    appointmentId,
+                    dateFormat.format(Timestamp.valueOf(start)),
+                    dateFormat.format(Timestamp.valueOf(start)));
+
+            Statement retrievalStatement = dbConnection.createStatement();
+            results = retrievalStatement.executeQuery(sqlQuery);
+        } catch (SQLException err) {
+            err.printStackTrace();
+        }
+
+        return results;
+    }
+
     public static ResultSet getUpcomingAppointments(ReportingMode reportingMode, String userId) {
         TemporalField usField = WeekFields.of(java.util.Locale.US).dayOfWeek();
         LocalDateTime currentDate = LocalDateTime.now();

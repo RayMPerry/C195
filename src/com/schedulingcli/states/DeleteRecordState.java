@@ -21,7 +21,6 @@ public class DeleteRecordState implements BasicState {
         InputManager.setValidResponsesWithArray(validIds.toArray(String[]::new));
         draw();
         String response = InputManager.waitForValidInput();
-        DBManager.cleanUpPastAppointments();
         if (!response.equals(InputManager.cancelCommand)) {
             try {
                 DBManager.deleteWithCondition(itemName, itemName + "Id", response);

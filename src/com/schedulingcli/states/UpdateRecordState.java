@@ -134,6 +134,13 @@ public class UpdateRecordState implements BasicState {
 
                 if (results != null && results.next()) throw new Exception("Appointments would overlap. Resetting.");
 
+                results = DBManager.retrieveAllOverlappingAppointments(
+                        String.valueOf(currentAppointment.getAppointmentId()),
+                        StateManager.getValue("loggedInUserId"),
+                        start);
+
+                if (results != null && results.next()) throw new Exception("Appointments would overlap. Resetting.");
+
                 if (!InputManager.areDatesDuringBusinessHours(start, end)) {
                     throw new Exception(String.format("Appointment is outside of business hours (%s - %s).",
                             StateManager.BUSINESS_OPEN,
